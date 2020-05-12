@@ -1,0 +1,130 @@
+
+apiVersion:  tekton.dev/v1alpha1
+kind: Condition
+metadata:
+  name: {{ include "k8sCI.fullname" . }}-master-merge-cond
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  params:
+    - name: "ref"
+  check:
+    image: alpine
+    script: 'test "$(params.ref)" == "refs/heads/master'
+---
+
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: build
+metadata:
+  name: {{ include "k8sCI.fullname" . }}-build-triggertemplate
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  params:
+  - name: gitrevision
+    description: The git revision
+    default: master
+  - name: gitrepositorysshurl
+    description: The github url
+  - name: org
+    description: The github org of the PR
+  - name: repo
+    description: The github repo of the PR
+  - name: message
+    description: The message to print
+    default: build
+  - name: ref
+    description: branch of the PR
+  - name: image
+    default: "167742443741.dkr.ecr.us-west-2.amazonaws.com/node:12.13.0-build"
+    description: branch of the PR
+  resourcetemplates:
+  - apiVersion:  tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: build-pipeline-run-
+    spec:
+      serviceAccountName: tektoncd
+      pipelineSpec:
+        resources:
+        - name: source-repo
+          type: git
+        tasks:
+          - name: build
+            params:
+              - name: org
+                value: $(params.org)
+              - name: repo
+                value: $(params.repo)
+              - name: git_sha
+                value: $(params.gitrevision)
+              - name: ref
+                value: $(params.ref)
+              - name: image
+                value: $(params.image)
+            resources:
+              - name: git-repo
+                resource: source-repo
+            taskRef:
+              name: build
+          - name: release
+            params:
+              - name: org
+                value: $(params.org)
+              - name: repo
+                value: $(params.repo)
+              - name: git_sha
+                value: $(params.gitrevision)
+              - name: ref
+                value: $(params.ref)
+              - name: image
+                value: $(params.image)
+            resources:
+              - name: git-repo
+                resource: source-repo
+            taskRef:
+              name: release
+            conditions:
+            - conditionRef: master-merge
+              params:
+                - name: ref
+                  value: "refs/heads/master"
+              resources:
+                - name: workspace
+                  resource: source-repo
+          - name: deploy-nonprod
+            params:
+              - name: org
+                value: $(params.org)
+              - name: repo
+                value: $(params.repo)
+              - name: git_sha
+                value: $(params.gitrevision)
+              - name: ref
+                value: $(params.ref)
+              - name: image
+                value: $(params.image)
+            resources:
+              - name: git-repo
+                resource: source-repo
+            taskRef:
+              name: deploy-non-prod
+            conditions:
+            - conditionRef: master-merge
+              params:
+                - name: ref
+                  value: $(params.ref)
+              resources:
+                - name: workspace
+                  resource: source-repo
+      resources:
+      - name: source-repo
+        resourceSpec:
+          type: git
+          params:
+          - name: revision
+            value: $(params.gitrevision)
+          - name: url
+            value: $(params.gitrepositorysshurl)

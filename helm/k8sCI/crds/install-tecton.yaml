@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "install-tecton"
+spec:
+  template:
+    metadata:
+      name: "instal-tecton"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: install-tecton
+        image: "bitnami/kubectl"
+        env:
+        - name: TECTON_INSTALL
+          value: &TECTON_INSTALL |-
+            kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml;
+            kubectl apply --filename https://storage.googleapis.com/tekton-releases/triggers/latest/release.yaml;
+            kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.6.1/tekton-dashboard-release.yaml;
+        command: ["/bin/sh"]
+        args: ["-c", *TECTON_INSTALL]
