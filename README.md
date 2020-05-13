@@ -6,7 +6,7 @@ This is the CI/CD system we use at keyporttech. It is an implementation of (tekt
 
 There is no centralized server, no Jenkinsfiles or other yaml config needed. After the initial setup you add webhooks and Makefile if not present. Build images for build containers must be supplied by the end user, but the keyportech golang and nodejs images are provided as examples.
 
-Don't like Makefiles or need more specialized pipelines? Not a problem k8sCI is easy to modify and provides an excellent starting point for you own custom platform.
+Don't like Makefiles or need more specialized pipelines? Not a problem since k8sCI is easy to modify and provides an excellent starting point for your own custom platform.
 
 ## Installation
 
