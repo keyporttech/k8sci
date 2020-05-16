@@ -1,12 +1,12 @@
 # k8sCI
 
-This is the CI/CD system we use at keyporttech. It is an implementation of (tekton/pipeline)[https://github.com/tektoncd/pipeline] (tekton/trigger)[https://github.com/tektoncd/triggers] packaged into a helm chart.
+This is the CI/CD system we use at keyporttech. It is an implementation of [tekton/pipeline](https://github.com/tektoncd/pipeline) [tekton/trigger](https://github.com/tektoncd/triggers) packaged into a helm chart.
 
-(Tekton pipelines)[https://github.com/tektoncd/pipeline] are kubernetes custom resource definitions designed specifically for running jobs and pipelines. Tecton pipelines are used to create a pipeline that runs make using a Makefile. By default the pipeline will execute make build targets on code pushes, and make deploy on merge to master. To use k8sCI you need to: install tecton pipeline, triggers, dashboard, install the k8sCI helm chart with the build image configured in the yaml, add web hooks to your source repo. k8sCI has been tested with both public github and gitea running on kuberenets 1.18 on a bare-metal cluster.
+[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed specifically for running jobs and pipelines. Tecton pipelines are used to create a pipeline that runs make using a Makefile. By default the pipeline will execute make build targets on code pushes, and make deploy on merge to master. To use k8sCI you need to: install tecton pipeline, triggers, dashboard, install the k8sCI helm chart with the build image configured in the yaml, add web hooks to your source repo. k8sCI has been tested with both public github and gitea running on kuberenets 1.18 on a bare-metal cluster.
 
-There is no centralized server, no Jenkinsfiles or other yaml config needed. After the initial setup you add webhooks and Makefile if not present. Build images for build containers must be supplied by the end user, but the keyportech golang and nodejs images are provided as examples.
+There is no centralized server, no Jenkinsfiles or other yaml config needed. After the initial setup you add webhooks and Makefile if not present. Docker images for build containers must be supplied by the end user, but the keyportech golang and nodejs images are provided as examples.
 
-Don't like Makefiles or need more specialized pipelines? Not a problem since k8sCI is easy to modify and provides an excellent starting point for your own custom platform.
+Don't like Makefiles or need more specialized pipelines? Not a problem since k8sCI is easy to modify and provides an excellent starting point for a custom cicd platform.
 
 ## Installation
 
@@ -35,7 +35,22 @@ kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download
 ```bash
 # CLONE THIS REPO then:
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
+```
 
+example yaml values file to enable ingress:
+
+```yaml
+ingress:
+  enabled: true
+  host: cicd.keyporttech.com
+  dashboardHost: dashboard.cicd.keyporttech.com
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.allow-http: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 ```
 
 ### configuration and usage
