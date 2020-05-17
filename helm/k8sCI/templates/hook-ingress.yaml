@@ -32,6 +32,14 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: "{{ include "k8sCI.fullname" . }}-gh-interceptor"
+              serviceName: "el-{{ include "k8sCI.fullname" . }}-gh-interceptor"
+              servicePort: 8080
+          - path: /github
+            backend:
+              serviceName: "el-{{ include "k8sCI.fullname" . }}-gh-interceptor"
+              servicePort: 8080
+          - path: /gitea
+            backend:
+              serviceName: "el-{{ include "k8sCI.fullname" . }}-gitea-interceptor"
               servicePort: 8080
   {{- end }}

@@ -1,0 +1,29 @@
+
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: {{ include "k8sCI.fullname" . }}-gitea-interceptor
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  serviceAccountName: tektoncd
+  triggers:
+    - name: {{ include "k8sCI.fullname" . }}-gitea-build
+      interceptors:
+        - webhook:
+            header:
+              - name: Foo-Trig-Header1
+                value: string-value
+              - name: Foo-Trig-Header2
+                value:
+                  - array-val1
+                  - array-val2
+            objectRef:
+              kind: Service
+              name: gh-validate
+              apiVersion: v1
+              namespace: default
+      bindings:
+        - name: build
+      template:
+        name: build

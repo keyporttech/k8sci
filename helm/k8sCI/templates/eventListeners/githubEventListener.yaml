@@ -8,7 +8,7 @@ metadata:
 spec:
   serviceAccountName: tektoncd
   triggers:
-    - name: build
+    - name:  {{ include "k8sCI.fullname" . }}-github-build
       interceptors:
         - github:
             secretRef:
