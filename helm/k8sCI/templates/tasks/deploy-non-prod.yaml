@@ -1,7 +1,9 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: deploy-non-prod
+  name: {{ include "k8sCI.fullname" . }}-deploy-nonprod
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
 spec:
   resources:
     inputs:
@@ -15,7 +17,7 @@ spec:
     - name: image
   steps:
     - name: build
-      image: 167742443741.dkr.ecr.us-west-2.amazonaws.com/node:12.13.0-build
+      image: "$(params.image)"
       command:
         - make
       args:

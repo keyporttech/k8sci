@@ -1,7 +1,9 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: release
+  name: {{ include "k8sCI.fullname" . }}-release
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
 spec:
   resources:
     inputs:
@@ -14,42 +16,7 @@ spec:
     - name: ref
     - name: image
   steps:
-    - name: use-artifactory
-      workingDir: "/workspace/git-repo"
-      image: "$(params.image)"
-      command:
-        - "bash"
-      args:
-        - "-cx"
-        - |
-          set +e;
-          echo "installing artifactory creds in ${HOME}/.npmrc";
-          export AWS_DEFAULT_REGION=us-west-2;
-          export ARTIFACTORY_USER=$(aws ssm get-parameters --with-decryption  --names /cicd/artifactory_user | jq .Parameters[0].Value | sed -e 's/^"//' -e 's/"$//');
-          export ARTIFACTORY_PASSWORD=$(aws ssm get-parameters --with-decryption  --names /cicd/artifactory_password | jq .Parameters[0].Value | sed -e 's/^"//' -e 's/"$//');
-          export ARTIFACTORY_URL=$(aws ssm get-parameters --with-decryption  --names /cicd/artifactory_url | jq .Parameters[0].Value | sed -e 's/^"//' -e 's/"$//');
-          use-artifactory;
-          RESULT=$?
-          [ $RESULT -ne 0 ] && echo "error" > /tekton/home/status ;
-          [ $RESULT -ne 0 ] && echo "unable to use artifactory" > /tekton/home/description;
-          exit $RESULT;
-    - name: use-ecr
-      image: 167742443741.dkr.ecr.us-west-2.amazonaws.com/node:12.13.0-build
-      workingDir: "/workspace/git-repo"
-      command:
-        - bash
-      args:
-        - "-cx"
-        - |
-          set +e;
-          use-ecr;
-          RESULT=$?
-          [ $RESULT -ne 0 ] && echo "error" > /tekton/home/status;
-          [ $RESULT -ne 0 ] && echo "unable to configure ecr" > /tekton/home/description;
-          exit $RESULT;
-      volumeMounts:
-      - mountPath: /tekton/home
-        name: home
+
     - name: release
       image: "$(params.image)"
       command:

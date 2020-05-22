@@ -1,8 +1,10 @@
+{{- $fullName := include "k8sCI.fullname" . -}}
+{{- $labels := include "k8sCI.labels" . -}}
 
 apiVersion:  tekton.dev/v1alpha1
 kind: Condition
 metadata:
-  name: {{ include "k8sCI.fullname" . }}-master-merge-cond
+  name: "{{ $fullName }}-master-merge-cond"
   labels:
     {{- include "k8sCI.labels" . | nindent 4 }}
 spec:
@@ -11,42 +13,41 @@ spec:
   check:
     image: alpine
     script: 'test "$(params.ref)" == "refs/heads/master'
+
 ---
 
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: build
-metadata:
-  name: {{ include "k8sCI.fullname" . }}-build-triggertemplate
+  name: "{{ $fullName }}-build"
   labels:
-    {{- include "k8sCI.labels" . | nindent 4 }}
+    {{- $labels | nindent 4 }}
 spec:
   params:
   - name: gitrevision
     description: The git revision
     default: master
   - name: gitrepositorysshurl
-    description: The github url
+    description: "The git repo url"
   - name: org
-    description: The github org of the PR
+    description: "The github/gitea org of the PR"
   - name: repo
-    description: The github repo of the PR
+    description: "The github/gitea repo of the PR"
   - name: message
-    description: The message to print
+    description: "Notification message text"
     default: build
   - name: ref
-    description: branch of the PR
+    description: "git ref"
   - name: image
-    default: "167742443741.dkr.ecr.us-west-2.amazonaws.com/node:12.13.0-build"
-    description: branch of the PR
+    default: "{{ .image }}"
+    description: "build image"
   resourcetemplates:
   - apiVersion:  tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
       generateName: build-pipeline-run-
     spec:
-      serviceAccountName: tektoncd
+      serviceAccountName: "{{ $fullName }}"
       pipelineSpec:
         resources:
         - name: source-repo
@@ -68,7 +69,7 @@ spec:
               - name: git-repo
                 resource: source-repo
             taskRef:
-              name: build
+              name: "{{ $fullName }}-build"
           - name: release
             params:
               - name: org
@@ -85,7 +86,7 @@ spec:
               - name: git-repo
                 resource: source-repo
             taskRef:
-              name: release
+              name: "{{ $fullName }}-release"
             conditions:
             - conditionRef: master-merge
               params:
@@ -110,7 +111,7 @@ spec:
               - name: git-repo
                 resource: source-repo
             taskRef:
-              name: deploy-non-prod
+              name: "{{ $fullName }}-deploy-non-prod"
             conditions:
             - conditionRef: master-merge
               params:

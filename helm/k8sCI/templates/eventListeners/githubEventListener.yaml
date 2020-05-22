@@ -1,14 +1,17 @@
+{{- $fullName := include "k8sCI.fullname" . -}}
+{{- $labels := include "k8sCI.labels" . -}}
+{{- range .Values.build_images }}
 
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: {{ include "k8sCI.fullname" . }}-gh-interceptor
+  name: "{{ $fullName }}-gh-{{ .name }}"
   labels:
-    {{- include "k8sCI.labels" . | nindent 4 }}
+    {{- $labels | nindent 4 }}
 spec:
-  serviceAccountName: tektoncd
+  serviceAccountName: {{ $fullName }}
   triggers:
-    - name:  {{ include "k8sCI.fullname" . }}-github-build
+    - name: "{{ $fullName }}-github-{{ .name }}"
       interceptors:
         - github:
             secretRef:
@@ -18,6 +21,10 @@ spec:
               - pull_request
               - push
       bindings:
-        - name: build
+        - name: "{{ $fullName }}-build-gitea-tb"
+        - name: "{{ $fullName }}-image-{{ .name }}-tb"
       template:
-        name: build
+        name: "{{ $fullName }}-build"
+---
+
+{{- end }}

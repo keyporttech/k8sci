@@ -1,29 +1,33 @@
-
+{{- $fullName := include "k8sCI.fullname" . -}}
+{{- $labels := include "k8sCI.labels" . -}}
+{{- range .Values.build_images }}
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: {{ include "k8sCI.fullname" . }}-gitea-interceptor
+  name: "{{ $fullName }}-gitea-{{ .name }}"
   labels:
-    {{- include "k8sCI.labels" . | nindent 4 }}
+    {{- $labels | nindent 4 }}
 spec:
-  serviceAccountName: tektoncd
+  serviceAccountName: {{ $fullName }}
   triggers:
-    - name: {{ include "k8sCI.fullname" . }}-gitea-build
+    - name: "{{$fullName }}-gitea-{{ .name }}"
       interceptors:
         - webhook:
             header:
-              - name: Foo-Trig-Header1
-                value: string-value
-              - name: Foo-Trig-Header2
+              - name: X-Gitea-Event
                 value:
-                  - array-val1
-                  - array-val2
+                  - push
             objectRef:
               kind: Service
-              name: gh-validate
+              name: wh-validate
               apiVersion: v1
               namespace: default
       bindings:
-        - name: build
+        - name: "{{ $fullName }}-build-gitea-tb"
+        - name: "{{ $fullName }}-image-{{ .name }}-tb"
       template:
-        name: build
+        name: "{{ $fullName }}-build"
+
+---
+
+{{- end }}

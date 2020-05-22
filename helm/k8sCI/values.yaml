@@ -4,13 +4,26 @@
 
 replicaCount: 1
 
-image:
-  repository: nginx
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+pullPolicy: IfNotPresent
+build_images:
+  - name: nodejs
+    image: registry.keyporttech.com:30243/node_12:12.13.0
+  - name: golang
+    image: registry.keyporttech.com:30243/golang_1.14:1.14.2-alpine
 
 imagePullSecrets: []
+
+slackNotify:
+  slackWebhook: https://hooks.slack.com/services/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
+
+secrets:
+  githubUser: octocat
+  githubToken: token
+  giteaUser: gitea
+  giteaToken: token
+
+
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -23,11 +36,6 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
 securityContext: {}
   # capabilities:
   #   drop:
@@ -36,9 +44,6 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-service:
-  type: ClusterIP
-  port: 80
 
 ingress:
   enabled: false
@@ -53,7 +58,7 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
+task-resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -64,16 +69,3 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}

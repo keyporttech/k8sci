@@ -1,7 +1,7 @@
 apiVersion:  triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: {{ include "k8sCI.fullname" . }}-build-tb
+  name: {{ include "k8sCI.fullname" . }}-build-gitea-tb
   labels:
     {{- include "k8sCI.labels" . | nindent 4 }}
 spec:
