@@ -21,6 +21,7 @@ secrets:
   githubToken: token
   giteaUser: gitea
   giteaToken: token
+  webhookSecretToken: "token_used_by_gihub/gitea"
 
 
 

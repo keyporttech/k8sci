@@ -19,9 +19,8 @@ spec:
                   - push
             objectRef:
               kind: Service
-              name: wh-validate
+              name: "{{ $fullName }}-gitea-validate"
               apiVersion: v1
-              namespace: default
       bindings:
         - name: "{{ $fullName }}-build-gitea-tb"
         - name: "{{ $fullName }}-image-{{ .name }}-tb"
