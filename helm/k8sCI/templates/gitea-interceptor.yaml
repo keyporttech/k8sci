@@ -1,4 +1,4 @@
-# Copyright 2019 The Tekton Authors
+# Copyright 2020 Keyporttech Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,16 +28,27 @@ spec:
       labels:
         app: "{{ include "k8sCI.fullname" . }}-gitea-validate"
     spec:
-      serviceAccountName: default
+      serviceAccountName: {{ include "k8sCI.fullname" . }}
       containers:
         - name: validate
           image: registry.keyporttech.com:30243/gitea-webbhook-interceptor:v0.1
+          imagePullPolicy: Always
           env:
             - name: GITEA_SECRET_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ include "k8sCI.fullname" . }}
                   key: webhookSecretToken
+          readinessProbe:
+            timeoutSeconds: 3
+            initialDelaySeconds: 3
+            tcpSocket:
+              port: 8080
+          livenessProbe:
+            timeoutSeconds: 3
+            initialDelaySeconds: 30
+            tcpSocket:
+              port: 8080
 ---
 apiVersion: v1
 kind: Service

@@ -18,3 +18,7 @@ spec:
     value: $(body.repository.owner.login)
   - name: ref
     value: $(body.ref)
+  - name: type
+    value: gitea
+  - name: htmlurl
+    value: $(body.repository.html_url)

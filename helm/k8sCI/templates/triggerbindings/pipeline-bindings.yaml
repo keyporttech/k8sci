@@ -1,17 +1,21 @@
 {{- $fullName := include "k8sCI.fullname" . -}}
 {{- $labels := include "k8sCI.labels" . -}}
-{{- range .Values.build_images }}
+{{- range .Values.cicdPipelines }}
 
 apiVersion:  triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: "{{ $fullName }}-image-{{ .name }}-tb"
+  name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
   labels:
     {{- $labels | nindent 4 }}
 spec:
   params:
   - name: image
     value: {{ .image }}
+  - name: ciCommand
+    value: {{ .ciCommand }}
+  - name: cdCommand
+    value: {{ .cdCommand }}
 
 ---
 {{- end }}

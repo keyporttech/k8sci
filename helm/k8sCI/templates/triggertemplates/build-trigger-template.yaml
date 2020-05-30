@@ -4,7 +4,7 @@
 apiVersion:  tekton.dev/v1alpha1
 kind: Condition
 metadata:
-  name: "{{ $fullName }}-master-merge-cond"
+  name: "{{ $fullName }}-master-merge"
   labels:
     {{- include "k8sCI.labels" . | nindent 4 }}
 spec:
@@ -12,7 +12,22 @@ spec:
     - name: "ref"
   check:
     image: alpine
-    script: 'test "$(params.ref)" == "refs/heads/master'
+    script: 'test "$(params.ref)" == "refs/heads/master"'
+
+---
+
+apiVersion:  tekton.dev/v1alpha1
+kind: Condition
+metadata:
+  name: "{{ $fullName }}-non-master-branch"
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  params:
+    - name: "ref"
+  check:
+    image: alpine
+    script: 'test "$(params.ref)" != "refs/heads/master"'
 
 ---
 
@@ -39,8 +54,15 @@ spec:
   - name: ref
     description: "git ref"
   - name: image
-    default: "{{ .image }}"
-    description: "build image"
+    description: "run image"
+  - name: ciCommand
+    description: "continuous integration command"
+  - name: cdCommand
+    description: "continuous delivery command"
+  - name: type
+    description: "type of pipeline: ex gitea/github"
+  - name: htmlurl
+    description: repo url
   resourcetemplates:
   - apiVersion:  tekton.dev/v1beta1
     kind: PipelineRun
@@ -50,10 +72,10 @@ spec:
       serviceAccountName: "{{ $fullName }}"
       pipelineSpec:
         resources:
-        - name: source-repo
-          type: git
+          - name: source-repo
+            type: git
         tasks:
-          - name: build
+          - name: ci
             params:
               - name: org
                 value: $(params.org)
@@ -65,67 +87,54 @@ spec:
                 value: $(params.ref)
               - name: image
                 value: $(params.image)
+              - name: command
+                value: $(params.ciCommand)
+              - name: htmlurl
+                value: $(params.htmlurl)
             resources:
-              - name: git-repo
-                resource: source-repo
-            taskRef:
-              name: "{{ $fullName }}-build"
-          - name: release
-            params:
-              - name: org
-                value: $(params.org)
-              - name: repo
-                value: $(params.repo)
-              - name: git_sha
-                value: $(params.gitrevision)
-              - name: ref
-                value: $(params.ref)
-              - name: image
-                value: $(params.image)
-            resources:
-              - name: git-repo
-                resource: source-repo
-            taskRef:
-              name: "{{ $fullName }}-release"
-            conditions:
-            - conditionRef: master-merge
-              params:
-                - name: ref
-                  value: "refs/heads/master"
-              resources:
-                - name: workspace
+              inputs:
+                - name: git-repo
                   resource: source-repo
-          - name: deploy-nonprod
-            params:
-              - name: org
-                value: $(params.org)
-              - name: repo
-                value: $(params.repo)
-              - name: git_sha
-                value: $(params.gitrevision)
-              - name: ref
-                value: $(params.ref)
-              - name: image
-                value: $(params.image)
-            resources:
-              - name: git-repo
-                resource: source-repo
             taskRef:
-              name: "{{ $fullName }}-deploy-non-prod"
+              name: "{{ $fullName }}-run-command-$(params.type)"
             conditions:
-            - conditionRef: master-merge
+            - conditionRef: "{{ $fullName }}-non-master-branch"
               params:
                 - name: ref
                   value: $(params.ref)
-              resources:
-                - name: workspace
+          - name: cd
+            params:
+              - name: org
+                value: $(params.org)
+              - name: repo
+                value: $(params.repo)
+              - name: git_sha
+                value: $(params.gitrevision)
+              - name: ref
+                value: $(params.ref)
+              - name: image
+                value: $(params.image)
+              - name: command
+                value: $(params.cdCommand)
+              - name: htmlurl
+                value: $(params.htmlurl)
+            resources:
+              inputs:
+                - name: git-repo
                   resource: source-repo
+            taskRef:
+              name: "{{ $fullName }}-run-command-$(params.type)"
+            conditions:
+            - conditionRef: "{{ $fullName }}-master-merge"
+              params:
+                - name: ref
+                  value: $(params.ref)
       resources:
-      - name: source-repo
-        resourceSpec:
-          type: git
-          params:
-          - name: revision
-            value: $(params.gitrevision)
-          - name: url
-            value: $(params.gitrepositorysshurl)
+        - name: source-repo
+          resourceSpec:
+            type: git
+            params:
+            - name: revision
+              value: $(params.gitrevision)
+            - name: url
+              value: $(params.gitrepositorysshurl)

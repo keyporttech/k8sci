@@ -1,6 +1,6 @@
 {{- $fullName := include "k8sCI.fullname" . -}}
 {{- $labels := include "k8sCI.labels" . -}}
-{{- range .Values.build_images }}
+{{- range .Values.cicdPipelines }}
 
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
@@ -22,7 +22,7 @@ spec:
               - push
       bindings:
         - name: "{{ $fullName }}-build-gitea-tb"
-        - name: "{{ $fullName }}-image-{{ .name }}-tb"
+        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"
 ---

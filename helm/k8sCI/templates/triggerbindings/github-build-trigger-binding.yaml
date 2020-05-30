@@ -18,3 +18,7 @@ spec:
     value: $(body.repository.owner.name)
   - name: ref
     value: $(body.ref)
+  - name: type
+    value: github
+  - name: htmlurl
+    value: $(body.repository.html_url)

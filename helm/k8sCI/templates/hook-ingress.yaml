@@ -33,7 +33,7 @@ spec:
             backend:
               serviceName: "el-{{ $fullName }}-gh-interceptor"
               servicePort: 8080
-          {{- range .Values.build_images }}
+          {{- range .Values.cicdPipelines}}
           - path: /github/{{ .name }}
             backend:
               serviceName: "el-{{ $fullName }}-gh-{{ .name }}"
