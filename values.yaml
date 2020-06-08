@@ -8,6 +8,12 @@ pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
+gitSources:
+  gitea:
+    apiEndPoint: https://<GITEA_SERVER>/api/v1
+  github:
+    apiEndPoint:  https://api.github.com
+
 # The cicd pipelines
 # each pipeline has a ci task run on push/pull request events
 # and a cd command run on merge protected branch (currently only master supported).
@@ -16,8 +22,10 @@ imagePullSecrets: []
 # cicdPipelines:
 #   - name: nodejs
 #     image: registry.domain.com/node:12.13.0
-#     ciCommand: "make build"
-#     cdCommand: "make deploy"
+#     ciCommands:
+#       - "make build"
+#     cdCommands:
+#       - "make deploy"
 #   - name: golang
 #     image: registry.domain.com:golang:1.14.2-alpine
 #     ciCommand: "make build"
@@ -87,10 +95,14 @@ ingress:
   hosts:
     - host: chart-example.local
       paths: []
-  tls: []
+  #tls:
   #  - secretName: chart-example-tls
   #    hosts:
-  #      - chart-example.local
+  #      - ccicd.example.com
+  #dashBoardTLS:
+  #  - secretName: dashboard-chart-example-tls
+  #    hosts:
+  #      - dashboard.cicd.example.com
 
 task-resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

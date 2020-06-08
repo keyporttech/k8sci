@@ -12,10 +12,10 @@ spec:
   params:
   - name: image
     value: {{ .image }}
-  - name: ciCommand
-    value: {{ .ciCommand }}
-  - name: cdCommand
-    value: {{ .cdCommand }}
+  - name: ciCommands
+    value: "{{ range .ciCommands }}{{ . }} {{ end }}"
+  - name: cdCommands
+    value: "{{ range .cdCommands }}{{ . }} {{ end }}"
 
 ---
 {{- end }}

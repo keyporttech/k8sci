@@ -55,10 +55,12 @@ spec:
     description: "git ref"
   - name: image
     description: "run image"
-  - name: ciCommand
+  - name: ciCommands
     description: "continuous integration command"
-  - name: cdCommand
+    type: array
+  - name: cdCommands
     description: "continuous delivery command"
+    type: array
   - name: type
     description: "type of pipeline: ex gitea/github"
   - name: htmlurl
@@ -87,8 +89,8 @@ spec:
                 value: $(params.ref)
               - name: image
                 value: $(params.image)
-              - name: command
-                value: $(params.ciCommand)
+              - name: commands
+                value: $(params.ciCommands)
               - name: htmlurl
                 value: $(params.htmlurl)
             resources:
@@ -114,8 +116,8 @@ spec:
                 value: $(params.ref)
               - name: image
                 value: $(params.image)
-              - name: command
-                value: $(params.cdCommand)
+              - name: commands
+                value: $(params.cdCommands)
               - name: htmlurl
                 value: $(params.htmlurl)
             resources:

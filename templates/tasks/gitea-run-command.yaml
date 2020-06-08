@@ -17,7 +17,7 @@ spec:
     - name: git_sha
     - name: ref
     - name: image
-    - name: command
+    - name: commands
     - name: htmlurl
   results:
     - name: status
@@ -34,16 +34,22 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
+      - name: COMMANDS
+        value: "$(params.commands)"
       command:
         - "bash"
       args:
         - "-cx"
         - |
           set +e;
-          $(params.command);
-          RESULT=$?
-          [ $RESULT -eq 0 ] && echo "success" > /tekton/home/status || echo "failure" > /tekton/home/status;
-          [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description
+          for command in "${COMMANDS[@]}"
+          do
+             :
+             $command;
+             RESULT=$?;
+             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status; exit 1;
+          done
+          echo "build succeeded." > /tekton/home/description; || echo "build failed." > /tekton/home/description;
           exit 0;
       volumeMounts:
       - mountPath: /tekton/home
