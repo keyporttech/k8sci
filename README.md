@@ -21,7 +21,8 @@ cicdPipelines:
   - name: golang
     image: registry.keyporttech.com/golang:1.14.2-alpine
     ciCommands:
-      - "make build"
+      - "make compile"
+      - "make test"
     cdCommands:
       - "make deploy"
 ```
