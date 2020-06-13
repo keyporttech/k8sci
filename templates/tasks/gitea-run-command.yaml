@@ -54,7 +54,7 @@ spec:
              ALL_OUTPUT="${ALL_OUTPUT}\n${output}"
              [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status; break
           done
-          [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description; || echo "build failed." > /tekton/home/description;
+          [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
           echo $ALL_OUTPUT > /home/tekton/output;
           exit 0;
       volumeMounts:
