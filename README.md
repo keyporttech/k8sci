@@ -71,7 +71,7 @@ cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
 
 ### Ingress configuration
 
-An ingress controller is required by k8sci since ingress endpoints are generated based on pipeline settings
+An ingress controller is required by k8sci since ingress endpoints are generated based on pipeline settings. A separate ingress is generated for the tekton dashboard.
 
 example ingress yaml values:
 
