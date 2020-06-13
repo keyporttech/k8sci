@@ -14,12 +14,16 @@ Example:
 cicdPipelines:
   - name: nodejs
     image: registry.keyporttech.com/node:12.13.0
-    ciCommand: "make build"
-    cdCommand: "make deploy"
+    ciCommands:
+      - "make build"
+    cdCommands:
+      - "make deploy"
   - name: golang
     image: registry.keyporttech.com/golang:1.14.2-alpine
-    ciCommand: "make build"
-    cdCommand: "make deploy"
+    ciCommands:
+      - "make build"
+    cdCommands:
+      - "make deploy"
 ```
 
 The chart exposes pipelines as webhook endpoints through an ingress. Different  uris are generated for github and gitea. Using the above pipeline an ingress controller using tls would generate the following:
