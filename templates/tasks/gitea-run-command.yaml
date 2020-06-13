@@ -56,7 +56,7 @@ spec:
              [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status; break
           done
           [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
-          echo $ALL_OUTPUT > /home/tekton/output;
+          echo $ALL_OUTPUT > /tekton/home/output;
           exit 0;
       volumeMounts:
       - mountPath: /tekton/home
@@ -114,8 +114,8 @@ spec:
           export STATUS=$(cat /tekton/home/status);
           [ "$STATUS" != "success" ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
           export SLACK_TITLE="${SYMBOL} gitea build: <$(params.htmlurl)|$(params.org)/$(params.repo) <{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}|${STATUS}>";
-          export SLACK_MESSAGE=$STATUS
-          [ "$STATUS" != "success" ] && export SLACK_MESSAGE="$(cat /home/tekton/output)";
+          export SLACK_MESSAGE="${STATUS}";
+          [ "$STATUS" != "success" ] && export SLACK_MESSAGE="build output:\n $(cat /tekton/home/output)";
           [ "$STATUS" != "success" ] && export SLACK_COLOR="danger" || export SLACK_COLOR="success";
           /slack-notify;
       volumeMounts:
