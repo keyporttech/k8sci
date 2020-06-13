@@ -93,10 +93,6 @@ spec:
                 value: $(params.ciCommands)
               - name: htmlurl
                 value: $(params.htmlurl)
-              - name: pipelineRunName 
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
             resources:
               inputs:
                 - name: git-repo
