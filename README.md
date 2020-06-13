@@ -2,11 +2,11 @@
 
 This is the CI/CD system in use at keyporttech. It is an implementation of [tekton/pipeline](https://github.com/tektoncd/pipeline) [tekton/trigger](https://github.com/tektoncd/triggers) packaged into a helm chart.
 
-[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed specifically for running jobs and pipelines. The combination of Helm and Tekton pipelines creates a flexible robust pipeline templating mechanism. Pipelines are defined in a helm values.yaml file with only 4 required attributes:
+[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed specifically for running jobs and pipelines.The combination of Helm and Tekton pipelines creates a flexible robust pipeline templating mechanism. Pipelines are defined in a helm values.yaml file:
   * name: name of the pipeline
   * image: docker image that runs the build
-  * ciCommand: Command to run on git push events ex: make build, but can be anything
-  * cdCommand: Command to run when code is pushed to master. Ex: make deploy
+  * ciCommands: array of commands to run on git push events ex: - make build, but can be anything
+  * cdCommands: array of commands to run when code is pushed to master. Ex: - make deploy
 
 Example:
 
