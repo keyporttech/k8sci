@@ -26,6 +26,8 @@ spec:
     - name: run
       image: "$(params.image)"
       workingDir: "/workspace/git-repo"
+      securityContext:
+        privileged: true
       env:
       {{- range .Values.pipelineEnvSecrets }}
       - name: {{ .name }}
@@ -41,15 +43,19 @@ spec:
       args:
         - "-cx"
         - |
+          ALL_OUTPUT="";
           set +e;
+          RESULT=0
           for command in "${COMMANDS[@]}"
           do
              :
-             $command;
+             output=$($command);
              RESULT=$?;
-             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status; exit 1;
+             ALL_OUTPUT="${ALL_OUTPUT}\n${output}"
+             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status; break
           done
-          echo "build succeeded." > /tekton/home/description; || echo "build failed." > /tekton/home/description;
+          [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description; || echo "build failed." > /tekton/home/description;
+          echo $ALL_OUTPUT > /home/tekton/output;
           exit 0;
       volumeMounts:
       - mountPath: /tekton/home
@@ -94,15 +100,21 @@ spec:
           value: {{ .Values.notifications.slackWebhook }}
         - name: SLACK_USERNAME
           value: "{{ $fullName }}"
+        - name: PIPELINERUN_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
       workingDir: "/workspace/git-repo"
       command:
         - "bash"
       args:
         - "-cx"
         - |
-          export SLACK_TITLE="gitea: $(params.org)/$(params.repo) $(cat /tekton/home/status)"
-          export SLACK_MESSAGE="$(params.htmlurl) $(cat /tekton/home/description) ref=$(params.ref)"
-          [ "$STATE" != "success" ] && export SLACK_COLOR="danger" || export SLACK_COLOR="success"
+          export STATUS=$(cat /tekton/home/status)
+          [ "$STATUS" != "success" ] && SYMBOL=:no_entry: || SYMBOL=:thumbsup:
+          export SLACK_TITLE="${SYMBOL} gitea build: <$(params.html_url)|$(params.org)/$(params.repo) <{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}|${STATUS}>"
+          [ "$STATUS" != "success" ] && export SLACK_MESSAGE=""$(cat /home/tekton/output)" 
+          [ "$STATUS" != "success" ] && export SLACK_COLOR="danger" || export SLACK_COLOR="success"
           /slack-notify
       volumeMounts:
       - mountPath: /tekton/home
