@@ -41,9 +41,9 @@ k8sCI provides and excellent starting point if further customization is needed. 
 
 ### prerequisites
 
-1.) A running modern supported version of kubernetes. An ingress controller is required. This chart was tested and developed against nginx ingress controller, which is easly installed and configured through a [helm chart](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
+1.) A running modern supported version of kubernetes. An ingress controller is required. This chart was tested and developed against nginx ingress controller, which is easily installed and configured through a [helm chart](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
 
-2.) Tecton CRDs installed on the cluster. The tecton CRDs are deliberately left out of the helm chart, since they have their own install ditribtions and are evolving rapidly.
+2.) Tekton CRDs installed on the cluster. The tekton CRDs are deliberately left out of the helm chart, since they have their own install distributions and are evolving rapidly. They will be included as part of the chart in later releases.
 
 ```bash
 # pipelines
@@ -64,7 +64,14 @@ kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download
 ```bash
 # CLONE THIS REPO then:
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
+
 ```
+
+## Configuration and usage
+
+### Ingress configuration
+
+An ingress controller is required by k8sci since ingress endpoints are generated based on pipeline settings
 
 example ingress yaml values:
 
@@ -82,10 +89,17 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 ```
 
-### configuration and usage
 
+### Enabling Slack notifications
 
-Example values.yaml
+If configured k8sci can send notifications using a (slack webhook)[https://api.slack.com/messaging/webhooks]. This can be configured as follows in your values.yaml:
+
+```yaml
+slack-notify:
+  slack-webhook: "https://hooks.slack.com/services/TTTTTTTTT/B011111111111111111111111111111111"
+```
+
+### Example values.yaml
 
 ```yaml
 gitSources:
