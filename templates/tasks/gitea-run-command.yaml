@@ -114,9 +114,10 @@ spec:
         - |
           export STATUS=$(cat /tekton/home/status);
           [ "$STATUS" != "success" ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
-          export SLACK_TITLE="${SYMBOL} gitea build: <$(params.htmlurl)|$(params.org)/$(params.repo)> <{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}|${STATUS}>";
+          export SLACK_TITLE="${SYMBOL} gitea $(params.org)/$(params.repo) $(params.htmlurl) : ${STATUS} {{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}";
           export SLACK_MESSAGE="${STATUS}";
-          [ "$STATUS" != "success" ] && export SLACK_MESSAGE="build output:\n $(cat /tekton/home/output)";
+          [ "$STATUS" != "success" ] && export SLACK_MESSAGE="build output:
+          $(cat /tekton/home/output)";
           [ "$STATUS" != "success" ] && export SLACK_COLOR="danger" || export SLACK_COLOR="success";
           /slack-notify;
       volumeMounts:
