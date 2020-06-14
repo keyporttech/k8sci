@@ -18,7 +18,7 @@ REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 lint:
 	@echo "linting..."
 	helm lint .
-	helm template test ./
+	helm template test ./ --output-dir  rendered
 .PHONY: lint
 
 test:
