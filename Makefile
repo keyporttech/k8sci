@@ -11,18 +11,17 @@
 
 REGISTRY=registry.keyporttech.com:30243
 DOCKERHUB_REGISTRY="keyporttech"
-CHART=k8sci
+CHART=$(shell yq r Chart.yaml 'version')
 VERSION = $(shell yq r Chart.yaml 'version')
 REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 
 lint:
 	@echo "linting..."
-	helm version
-	HELM_EXPERIMENTAL_OCI=1 helm chart save ./ ${REGISTRY_TAG}
-	HELM_EXPERIMENTAL_OCI=1 helm chart export ${REGISTRY_TAG}
-	helm lint ./k8sci/
+	mkdir -p ${CHART}
+	rsync -av --progress ./ ./${CHART} --exclude thefoldertoexclude --exclude ${CHART}
+	helm lint ./${CHART}/
 	helm template test ./
-	rm -rf ./k8sci
+	rm -rf ./${CHART}
 .PHONY: lint
 
 test:
