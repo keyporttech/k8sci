@@ -17,11 +17,8 @@ REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 
 lint:
 	@echo "linting..."
-	mkdir -p ${CHART}
-	rsync -av --progress ./ ./${CHART} --exclude thefoldertoexclude --exclude ${CHART}
-	helm lint ./${CHART}/
+	helm lint .
 	helm template test ./
-	rm -rf ./${CHART}
 .PHONY: lint
 
 test:
