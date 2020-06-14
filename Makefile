@@ -17,8 +17,11 @@ REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 
 lint:
 	@echo "linting..."
-	helm lint
+	HELM_EXPERIMENTAL_OCI=1 helm chart save ./ ${REGISTRY_TAG}
+	HELM_EXPERIMENTAL_OCI=1 helm chart export  ${REGISTRY_TAG}
+	helm lint ./k8sci/
 	helm template test ./
+	rm -rf ./k8sci
 .PHONY: lint
 
 test:
