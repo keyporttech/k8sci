@@ -11,7 +11,7 @@
 
 REGISTRY=registry.keyporttech.com:30243
 DOCKERHUB_REGISTRY="keyporttech"
-CHART=$(shell yq r Chart.yaml 'version')
+CHART=$(shell yq r Chart.yaml 'name')
 VERSION = $(shell yq r Chart.yaml 'version')
 REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 
