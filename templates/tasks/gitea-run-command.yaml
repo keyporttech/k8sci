@@ -54,9 +54,9 @@ spec:
              RESULT=$?;
              ALL_OUTPUT="${ALL_OUTPUT}
              ${output}"
-             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status; break
+             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status && break
           done
-          [ $RESULT -eq 0 ]  echo "success" > /tekton/home/status;
+          [ $RESULT -eq 0 ] && echo "success" > /tekton/home/status;
           [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
           echo $ALL_OUTPUT > /tekton/home/output;
           exit 0;
