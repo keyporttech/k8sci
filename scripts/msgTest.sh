@@ -9,7 +9,7 @@ PAYLOAD=$( cat <<EOT
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": ":thumbsup: gitea success\n\nRepo: <https://git.keyporttech.com:30243/keyporttech/k8sCI|keyporttech/k8sCI>\n\n<https://dashboard.cicd.keyporttech.com:30243/#/namespaces/cicd/pipelineruns/build-pipeline-run-k58wr-ci-bzkv4-pod-6grpv|build information>"
+        "text": ":thumbsup: gitea success\n\nRepo: <https://git.keyporttech.com:30243/keyporttech/k8sCI|keyporttech/k8sCI>\n\n<https://dashboard.cicd.keyporttech.com:30243/#/namespaces/cicd/pipelineruns/build-pipeline-run-rvvkb-ci-qjj26-pod-94gsx|build information>"
       }
     },
     {
@@ -19,7 +19,7 @@ PAYLOAD=$( cat <<EOT
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "test"
+        "text": "kk"
       }
     }
   ]
