@@ -115,7 +115,7 @@ spec:
         - |
           export STATUS=$(cat /tekton/home/status);
           [ "$STATUS" != "success" ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
-          export SLACK_TITLE="${SYMBOL} gitea ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)\n\n$<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}|build information>";
+          export SLACK_TITLE="${SYMBOL} gitea ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}|build information>";
           export SLACK_MESSAGE="";
           [ "$STATUS" != "success" ] && export SLACK_MESSAGE="```$(cat /tekton/home/output)```";
           PAYLOAD=$( cat <<EOT
