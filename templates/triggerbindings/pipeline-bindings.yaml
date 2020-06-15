@@ -16,6 +16,8 @@ spec:
     value: "{{ range .ciCommands }}{{ . }} {{ end }}"
   - name: cdCommands
     value: "{{ range .cdCommands }}{{ . }} {{ end }}"
+  - name: pipelineName
+    value: {{ .name }}
 
 ---
 {{- end }}

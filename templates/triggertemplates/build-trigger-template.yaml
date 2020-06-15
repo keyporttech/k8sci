@@ -65,6 +65,8 @@ spec:
     description: "type of pipeline: ex gitea/github"
   - name: htmlurl
     description: repo url
+  - name: pipelineName
+    description: Name of the pipeline being run
   resourcetemplates:
   - apiVersion:  tekton.dev/v1beta1
     kind: PipelineRun
@@ -93,6 +95,14 @@ spec:
                 value: $(params.ciCommands)
               - name: htmlurl
                 value: $(params.htmlurl)
+              - name: pipelineType
+                value: "Continuous Intgegration"
+              - name: pipelineId
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: pipelineName
+                value: $(params.pipelineName)
             resources:
               inputs:
                 - name: git-repo
@@ -120,6 +130,14 @@ spec:
                 value: $(params.cdCommands)
               - name: htmlurl
                 value: $(params.htmlurl)
+              - name: pipelineType
+                value: "Continuous Deployment"
+              - name: pipelineId
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: pipelineName
+                value: $(params.pipelineName)
             resources:
               inputs:
                 - name: git-repo

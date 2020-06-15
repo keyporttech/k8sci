@@ -19,6 +19,9 @@ spec:
     - name: image
     - name: commands
     - name: htmlurl
+    - name: pipelineName
+    - name: pipelineId
+    - name: pipelineType
   results:
     - name: status
     - name: description
@@ -103,10 +106,6 @@ spec:
           value: {{ .Values.notifications.slackWebhook }}
         - name: SLACK_USERNAME
           value: "{{ $fullName }}"
-        - name: PIPELINERUN_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.labels["tekton.dev/pipelineRun"]
       workingDir: "/workspace/git-repo"
       command:
         - "bash"
@@ -115,7 +114,7 @@ spec:
         - |
           export STATUS=$(cat /tekton/home/status);
           [ "$STATUS" != "success" ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
-          export SLACK_TITLE="${SYMBOL} gitea ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINERUN_NAME}|build information>";
+          export SLACK_TITLE="${SYMBOL} pipeline gitea $(params.pipelineName) $(params.pipelineType) ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/$(params.pipelineId)|build information>";
           export SLACK_MESSAGE="message: $(cat /tekton/home/description)";
           [ "$STATUS" != "success" ] && export SLACK_MESSAGE="```$(cat /tekton/home/output)```";
           PAYLOAD=$( cat <<EOT
