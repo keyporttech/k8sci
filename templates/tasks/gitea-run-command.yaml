@@ -20,7 +20,6 @@ spec:
     - name: commands
     - name: htmlurl
     - name: pipelineName
-    - name: pipelineId
     - name: pipelineType
   results:
     - name: status
