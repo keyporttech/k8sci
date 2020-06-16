@@ -108,7 +108,7 @@ spec:
         - name: PIPELINE_RUN
           valueFrom:
             fieldRef:
-              fieldPath: metadata.label[tekton.dev/pipelineRun]
+              fieldPath: metadata.labels['tekton.dev/pipelineRun']
       workingDir: "/workspace/git-repo"
       command:
         - "bash"
