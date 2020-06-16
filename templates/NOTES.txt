@@ -1,0 +1,20 @@
+k8sci is installed in namespace {{ .Release.namespace }}
+
+{{- if .Values.ingress.enabled }}
+Webhook urls
+{{- $host := .Values.ingress.host -}}
+{{- range .Values.build_images }}
+  {{- range .paths }}
+  http(s)://{{ $host }}/github/{{ .name }}
+  http(s)://{{ $host }}/gitea/{{ .name }}
+  {{- end }}
+{{- end }}
+
+{{- end }}
+
+To view the generated objects:
+
+kubectl get TriggerTemplate -n  {{ .Release.namespace }}
+kubectl get TriggerTemplate -n  {{ .Release.namespace }}
+kubectl get Tasks -n  {{ .Release.namespace }}
+kubectl get el -n  {{ .Release.namespace }}

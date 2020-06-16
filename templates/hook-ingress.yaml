@@ -1,0 +1,40 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "k8sCI.fullname" . -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls }}
+  tls:
+{{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: "el-{{ $fullName }}-gh-interceptor"
+              servicePort: 8080
+          {{- range .Values.cicdPipelines}}
+          - path: /github/{{ .name }}
+            backend:
+              serviceName: "el-{{ $fullName }}-gh-{{ .name }}"
+              servicePort: 8080
+          - path: /gitea/{{ .name }}
+            backend:
+              serviceName: "el-{{ $fullName}}-gitea-{{ .name }}"
+              servicePort: 8080
+          {{- end }}
+{{- end }}
