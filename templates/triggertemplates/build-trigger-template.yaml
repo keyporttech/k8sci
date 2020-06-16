@@ -97,10 +97,6 @@ spec:
                 value: $(params.htmlurl)
               - name: pipelineType
                 value: "Continuous Intgegration"
-              - name: pipelineId
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
               - name: pipelineName
                 value: $(params.pipelineName)
             resources:
@@ -132,10 +128,6 @@ spec:
                 value: $(params.htmlurl)
               - name: pipelineType
                 value: "Continuous Deployment"
-              - name: pipelineId
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.name
               - name: pipelineName
                 value: $(params.pipelineName)
             resources:
