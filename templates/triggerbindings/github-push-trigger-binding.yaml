@@ -1,0 +1,24 @@
+apiVersion:  triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: {{ include "k8sCI.fullname" . }}-push-github-tb
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  params:
+  - name: gitrevision
+    value: $(body.head_commit.id)
+  - name: gitrepositorysshurl
+    value: $(body.repository.ssh_url)
+  - name: contenttype
+    value: $(header.Content-Type)
+  - name: repo
+    value: $(body.repository.name)
+  - name: org
+    value: $(body.repository.owner.name)
+  - name: ref
+    value: $(body.ref)
+  - name: type
+    value: github
+  - name: htmlurl
+    value: $(body.repository.html_url)

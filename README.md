@@ -1,8 +1,17 @@
 # k8sCI
 
-This is the CI/CD system in use at keyporttech. It is an implementation of [tekton/pipeline](https://github.com/tektoncd/pipeline) [tekton/trigger](https://github.com/tektoncd/triggers) packaged into a helm chart.
+Keyporttech's own CI/CD system. It is an implementation of [tekton/pipeline](https://github.com/tektoncd/pipeline) [tekton/trigger](https://github.com/tektoncd/triggers) packaged into a helm chart. K8sci proudly dogfoods itself and handles its own build and deploy pipeline.
 
-[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed specifically for running jobs and pipelines.The combination of Helm and Tekton pipelines creates a flexible robust pipeline templating mechanism. Pipelines are defined in a helm values.yaml file:
+### Features
+  * Simple and flexible yaml pipeline definitions in a helm values.yaml
+  * A focus on the essential functionality: execution and notification
+  * Docker image based
+  * Pipelines only limited by the docker build images used. Will support anything from a simple Makefile to even running github actions
+  * A flexible architecture that can support any github source repo. Currently supports github and gitea.
+  * Each pipeline generates its own webservice endpoint through use of a kubernetes ingress controller
+  * Allows for the development of secure cicd by allowing implementation to be hidden in a docker container
+
+[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed for running jobs and pipelines. The combination of Helm and Tekton pipelines creates a powerfil flexible robust pipeline templating mechanism. Pipelines are defined in a helm values.yaml file:
   * name: name of the pipeline
   * image: docker image that runs the build
   * ciCommands: array of commands to run on git push events ex: - make build, but can be anything
@@ -27,6 +36,7 @@ cicdPipelines:
       - "make deploy"
 ```
 
+### Generated Endpoints 
 The chart exposes pipelines as webhook endpoints through an ingress. Different  uris are generated for github and gitea. Using the above pipeline an ingress controller using tls would generate the following:
   * https://host/gitea/golang
   * https://host/gitea/nodejs

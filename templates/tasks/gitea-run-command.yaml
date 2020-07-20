@@ -26,11 +26,8 @@ spec:
     - name: description
     - name: output
   steps:
-    - name: run
+    - name: post-pending-status-gitea
       image: "$(params.image)"
-      workingDir: "/workspace/git-repo"
-      securityContext:
-        privileged: true
       env:
       {{- range .Values.pipelineEnvSecrets }}
       - name: {{ .name }}
@@ -46,21 +43,63 @@ spec:
       args:
         - "-cx"
         - |
-          ALL_OUTPUT="";
+          for commandBundle in "${COMMANDS[@]}"
+          do
+            :
+            IFS=':';
+            read -ra commandArray <<< "$commandBundle";
+            command=commandArray[0];
+            status=commandArray[1];
+            # pending,success,error,failure,warning
+            curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            -H "accept: application/json" \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: application/json" -i -k -d "{\
+              \"context\": \"${status}\",\
+              \"description\": \"started...\",\
+              \"state\": \"pending\",\
+              \"target_url\": \"{{ .Values.ingress.host }}/dashboard\"\
+            };"
+          done
+    - name: run
+      image: "$(params.image)"
+      workingDir: "/workspace/git-repo"
+      securityContext:
+        privileged: true
+      env:
+      {{- range .Values.pipelineEnvSecrets }}
+      - name: {{ .name }}
+        valueFrom:
+          secretKeyRef:
+            name: {{ $fullName }}
+            key: {{ .name }}
+      {{- end }}
+      - name: COMMANDS
+        value: "$(params.commands)"
+      - name: GIT-REF
+        value: $(params.ref)
+      command:
+        - "bash"
+      args:
+        - "-cx"
+        - |
           set +e;
           RESULT=0
-          for command in "${COMMANDS[@]}"
+          for commandBundle in "${COMMANDS[@]}"
           do
              :
-             output=$($command 2>&1);
+             IFS=':';
+             read -ra commandArray <<< "$commandBundle";
+             command=commandArray[0];
+             status=commandArray[1];
+             ${command} &>> /tekton/home/output;
              RESULT=$?;
-             ALL_OUTPUT="${ALL_OUTPUT}
-             ${output}"
-             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status && break
+             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status/${status} && break
+             [ $RESULT -eq 0 ] && echo "success" > /tekton/home/status/${status}
+
           done
-          [ $RESULT -eq 0 ] && echo "success" > /tekton/home/status;
-          [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
-          echo $ALL_OUTPUT > /tekton/home/output;
+          [ $RESULT -eq 0 ] && echo "succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
+          cat /tekton/home/output;
           exit 0;
       volumeMounts:
       - mountPath: /tekton/home
@@ -69,6 +108,8 @@ spec:
         name: dind-storage
       - mountPath: /var/run/
         name: dind-socket
+      - mountPath: /root/.ssh
+        name: ssh-creds
     - name: post-commit-status-gitea
       image: "$(params.image)"
       env:
@@ -79,27 +120,37 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
+      - name: COMMANDS
+        value: "$(params.commands)"
       command:
         - "bash"
       args:
         - "-cx"
         - |
-          # pending,success,error,failure,warning
-          curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
-          -H "accept: application/json" \
-          -H "Authorization: token ${GITEA_TOKEN}" \
-          -H "Content-Type: application/json" -i -k -d "{\
-            \"context\": \"k8sCI\",\
-            \"description\": \"$(cat /tekton/home/description)\",\
-            \"state\": \"$(cat /tekton/home/status)\",\
-            \"target_url\": \"{{ .Values.ingress.host }}/dashboard\"\
-          }"
+          for commandBundle in "${COMMANDS[@]}"
+          do
+            :
+            IFS=':';
+            read -ra commandArray <<< "$commandBundle";
+            command=commandArray[0];
+            status=commandArray[1];
+            # pending,success,error,failure,warning
+            curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            -H "accept: application/json" \
+            -H "Authorization: token ${GITEA_TOKEN}" \
+            -H "Content-Type: application/json" -i -k -d "{\
+              \"context\": \"$(params.pipelineName)\",\
+              \"description\": \"$(cat /tekton/home/description)\",\
+              \"state\": \"$(cat /tekton/home/status/${status})\",\
+              \"target_url\": \"{{ .Values.ingress.host }}/dashboard\"\
+            }"
+          done
       volumeMounts:
       - mountPath: /tekton/home
         name: home
     {{- if .Values.notifications.slackWebhook }}
     - name: slack-notify
-      image: "registry.keyporttech.com:30243/golang_1.14:0.1.0"
+      image: "$(params.image)"
       env:
         - name: SLACK_WEBHOOK
           value: {{ .Values.notifications.slackWebhook }}
@@ -119,7 +170,8 @@ spec:
           [ "$STATUS" != "success" ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
           export SLACK_TITLE="${SYMBOL} gitea Pipeline: $(params.pipelineName) $(params.pipelineType)\n\nStatus: ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINE_RUN}|build information>";
           export SLACK_MESSAGE="message: $(params.commands) $(cat /tekton/home/description)";
-          [ "$STATUS" != "success" ] && export SLACK_MESSAGE="\`\`\`$(cat /tekton/home/output | tr -d '"' | tr -d "'")\`\`\`";
+          ## TODO SLACK API too picky with text - maybe giure out how to do a snippet
+          # [ "$STATUS" != "success" ] && export SLACK_MESSAGE="\`\`\`$(cat /tekton/home/output | sed "s/\"/\\\"/g" | sed "s/'//g" | sed "s/\`/\\\`/g" )\`\`\`";
           PAYLOAD=$( cat <<EOT
           {
             "blocks": [
@@ -144,9 +196,7 @@ spec:
           }
           EOT
           );
-
           curl -d "$PAYLOAD" -H "Content-Type: application/json" -X POST $SLACK_WEBHOOK
-
       volumeMounts:
       - mountPath: /tekton/home
         name: home
@@ -161,6 +211,24 @@ spec:
         name: dind-storage
       - mountPath: /var/run/
         name: dind-socket
+  - image: "$(params.image)"
+    name: init-ssh-creds
+    command:
+      - "sh"
+    args:
+      - "-c"
+      - |
+        cp /secretsDir/*  /root/.ssh
+        mv ~/.ssh/ssh-privatekey ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        mkdir -p /home/tekton/status
+    volumeMounts:
+      - mountPath: /root/.ssh
+        name: ssh-creds
+      - mountPath: /secretsDir
+        name: git-auth
+      - mountPath: /tekton/home
+        name: home
   volumes:
     - name: home
       emptyDir: {}
@@ -168,3 +236,8 @@ spec:
       emptyDir: {}
     - name: dind-socket
       emptyDir: {}
+    - name: ssh-creds
+      emptyDir: {}
+    - name: git-auth
+      secret:
+        secretName: "{{ $fullName }}-git-auth"

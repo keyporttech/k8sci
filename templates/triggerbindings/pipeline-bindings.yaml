@@ -13,9 +13,9 @@ spec:
   - name: image
     value: {{ .image }}
   - name: ciCommands
-    value: "{{ range .ciCommands }}{{ . }} {{ end }}"
+    value: "{{ range .ciCommands }}{{ .execute }}:{{ .setStatus }} {{ end }}"
   - name: cdCommands
-    value: "{{ range .cdCommands }}{{ . }} {{ end }}"
+    value: "{{ range .cdCommands }}{{ .execute }}:{{ .setStatus  }} {{ end }}"
   - name: pipelineName
     value: {{ .name }}
 

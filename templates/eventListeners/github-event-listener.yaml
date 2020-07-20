@@ -11,17 +11,29 @@ metadata:
 spec:
   serviceAccountName: {{ $fullName }}
   triggers:
-    - name: "{{ $fullName }}-github-{{ .name }}"
+    - name: "{{ $fullName }}-github-pr-{{ .name }}"
       interceptors:
         - github:
             secretRef:
-              secretName: tektoncd
-              secretKey: hook-secret
+              secretName: {{ $fullName }}
+              secretKey: webhookSecretToken
             eventTypes:
               - pull_request
+      bindings:
+        - name: "{{ $fullName }}-pr-github-tb"
+        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-build"
+    - name: "{{ $fullName }}-github-push-{{ .name }}"
+      interceptors:
+        - github:
+            secretRef:
+              secretName: {{ $fullName }}
+              secretKey: webhookSecretToken
+            eventTypes:
               - push
       bindings:
-        - name: "{{ $fullName }}-build-gitea-tb"
+        - name: "{{ $fullName }}-push-github-tb"
         - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"

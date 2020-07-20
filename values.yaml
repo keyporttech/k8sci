@@ -12,13 +12,18 @@ gitSources:
   gitea:
     apiEndPoint: https://<GITEA_SERVER>/api/v1
   github:
-    apiEndPoint:  https://api.github.com
+    apiEndPoint: https://api.github.com
+
+# Job cleaner - prunes old jobs over a certain age
+cleaner:
+  schedule: 12 * * * *
+  maxJobsToKeep: 200
 
 # The cicd pipelines
 # each pipeline has a ci task run on push/pull request events
 # and a cd command run on merge protected branch (currently only master supported).
 # The defined image is used to run the command
-#example:
+# example:
 # cicdPipelines:
 #   - name: nodejs
 #     image: registry.domain.com/node:12.13.0
@@ -50,17 +55,17 @@ pipelineEnvSecrets:
 # secret token use to encrypt payloads but github/gitea
 webhookSecretToken: "token_used_by_gihub/gitea"
 
-#gitAuthSsh:
-#  hosts:
-#   - <YOUR_HOST1>
-#  sshPrivatekey: your_key
-#  known_hosts: known_hosts_entry_to_your_ssh_server
-
-#gitAuthBasic:
-#  hosts:
+# gitAuthSsh:
+#   hosts:
 #    - <YOUR_HOST1>
-#  user: <YOUR_USER>
-#  password: your_password
+#   sshPrivatekey: your_key
+#   known_hosts: known_hosts_entry_to_your_ssh_server
+
+# gitAuthBasic:
+#   hosts:
+#    - <YOUR_HOST1>
+#   user: <YOUR_USER>
+#   password: your_password
 
 gitea:
   apiServer: https://git.keyporttech.com:30243/api
@@ -96,14 +101,14 @@ ingress:
   dashboardHost: dashboard.chart-example.local
   # used for generating links to the dashboard
   dashboardURL: 'https://dashboard.chart-example.local:<PORT>'
-  #tls:
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - ccicd.example.com
-  #dashBoardTLS:
-  #  - secretName: dashboard-chart-example-tls
-  #    hosts:
-  #      - dashboard.cicd.example.com
+  # tls:
+  #   - secretName: chart-example-tls
+  #     hosts:
+  #       - ccicd.example.com
+  # dashBoardTLS:
+  #   - secretName: dashboard-chart-example-tls
+  #     hosts:
+  #       - dashboard.cicd.example.com
 
 task-resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

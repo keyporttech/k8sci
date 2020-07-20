@@ -11,23 +11,34 @@
 
 REGISTRY=registry.keyporttech.com:30243
 DOCKERHUB_REGISTRY="keyporttech"
-CHART=$(shell yq r Chart.yaml 'name')
+CHART=k8sci
 VERSION = $(shell yq r Chart.yaml 'version')
+RELEASED_VERSION = $(shell helm repo add keyporttech https://keyporttech.github.io/helm-charts/ > /dev/null && helm repo update> /dev/null && helm show chart keyporttech/$(CHART) | yq - read 'version')
 REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
+CWD = $(shell pwd)
 
 lint:
 	@echo "linting..."
-	helm lint .
-	helm template test ./ --output-dir  rendered
+	helm lint
+	helm template test ./
+	ct lint --validate-maintainers=false --charts .
+	echo "NEW CHART VERISION=$(VERSION)"
+	echo "CURRENT RELEASED CHART VERSION=$(RELEASED_VERSION)"
+
+ifeq ($(VERSION),$(RELEASED_VERSION))
+	echo "$(VERSION) must be > $(RELEASED_VERSION). Please bump chart version."
+	exit 1
+endif
+
 .PHONY: lint
 
 test:
 	@echo "testing..."
-	helm test
+	ct install --charts .
 	@echo "OK"
 .PHONY: test
 
-build: lint
+build: lint test
 
 .PHONY: build
 
@@ -40,6 +51,24 @@ publish-local-registry:
 	@echo "OK"
 .PHONY: publish-local-registry
 
-deploy: publish-local-registry
+publish-public-repository:
+	#docker run -e GITHUB_TOKEN=${GITHUB_TOKEN} -v `pwd`:/charts/$(CHART) registry.keyporttech.com:30243/chart-testing:0.1.4 bash -cx " \
+	#	echo $GITHUB_TOKEN; \
+	rm -f *.tgz
+	helm package .;
+	curl -o releaseChart.sh https://raw.githubusercontent.com/keyporttech/helm-charts/master/scripts/releaseChart.sh; \
+	chmod +x releaseChart.sh; \
+	./releaseChart.sh $(CHART) $(VERSION) $(CWD);
+.PHONY: publish-public-repository
 
-.PHONY: build
+deploy: publish-local-registry publish-public-repository
+	rm -rf /tmp/helm-$(CHART)
+	rm -rf helm-charts
+	git clone git@github.com:keyporttech/helm-$(CHART).git /tmp/helm-$(CHART)
+	cd /tmp/helm-$(CHART) && git remote add downstream ssh://git@git.keyporttech.com:30222/keyporttech/helm-$(CHART).git
+	cd /tmp/helm-$(CHART) && git config --global user.email "bot@keyporttech.com"
+	cd /tmp/helm-$(CHART) && git config --global user.name "keyporttech-bot"
+	cd /tmp/helm-$(CHART) && git fetch downstream master
+	cd /tmp/helm-$(CHART) && git fetch origin
+	cd /tmp/helm-$(CHART) && git push -u origin downstream/master:master --force-with-lease
+.PHONY:deploy
