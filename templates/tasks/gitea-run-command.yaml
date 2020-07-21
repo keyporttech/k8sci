@@ -48,8 +48,8 @@ spec:
             :
             IFS=':';
             read -ra commandArray <<< "$commandBundle";
-            command=commandArray[0];
-            status=commandArray[1];
+            command=${commandArray[0]};
+            status=${commandArray[1]};
             # pending,success,error,failure,warning
             curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
@@ -90,8 +90,8 @@ spec:
              :
              IFS=':';
              read -ra commandArray <<< "$commandBundle";
-             command=commandArray[0];
-             status=commandArray[1];
+             command=${commandArray[0]};
+             status=${commandArray[1]};
              ${command} &>> /tekton/home/output;
              RESULT=$?;
              [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status/${status} && break
@@ -132,8 +132,8 @@ spec:
             :
             IFS=':';
             read -ra commandArray <<< "$commandBundle";
-            command=commandArray[0];
-            status=commandArray[1];
+            command=${commandArray[0]};
+            status=${commandArray[1]};
             # pending,success,error,failure,warning
             curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
