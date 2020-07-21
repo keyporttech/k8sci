@@ -37,13 +37,12 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
-      - name: STATUSES
-        value: ( $(params.statuses) )
       command:
         - "bash"
       args:
         - "-cx"
         - |
+          STATUSES=($(param.statuses)
           for status in "${STATUSES[@]}"
           do
             :
