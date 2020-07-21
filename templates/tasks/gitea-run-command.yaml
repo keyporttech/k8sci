@@ -70,8 +70,6 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
-      - name: COMMANDS
-        value: "$(params.commands)"
       - name: GIT-REF
         value: $(params.ref)
       command:
@@ -84,7 +82,9 @@ spec:
           INDEX=0;
           declare -a STATUSES
           STATUSES=($(params.statuses))
-          for sommand in "${COMMANDS[@]}"
+          declare -a COMMANDS
+          COMMANDS=($(params.commands))
+          for command in "${COMMANDS[@]}"
           do
              :
              status=${STATUSES[$INDEX]};
