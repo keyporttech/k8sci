@@ -22,21 +22,55 @@ Example:
 ```yaml
 cicdPipelines:
   - name: nodejs
-    image: registry.keyporttech.com/node:12.13.0
+    image: registry.keyporttech.com:30243/node_12:12.13.0
     ciCommands:
-      - "make build"
+      - execute: "make build"
+        setStatus: "build"
     cdCommands:
-      - "make deploy"
+      - execute: "make deploy"
+        setStatus: "deploy"
   - name: golang
-    image: registry.keyporttech.com/golang:1.14.2-alpine
+    image: registry.keyporttech.com:30243/golang_1.14:1.14.2-alpine
     ciCommands:
-      - "make compile"
-      - "make test"
+      - excute: "make build"
+        setStatus: build
     cdCommands:
-      - "make deploy"
+      - execute: "make deploy"
+        setstatus: "deploy"
+  - name: kti-website
+    image: registry.keyporttech.com:30243/jekyll_4.0.1:0.1.2
+    ciCommands:
+      - execute: "make build"
+        setStatus: "build"
+    cdCommands:
+      - execute: "make publish"
+        setStatus: "publish"
+  - name: helm-cicd-pipeline
+    image: registry.keyporttech.com:30243/chart-testing:0.1.5
+    ciCommands:
+      - execute: "make lint"
+        setStatus: "lint"
+      - execute: "make install"
+        setStatus: "test"
+      - execute: "make check-version"
+        setStatus: "version-check"
+    cdCommands:
+      - execute: "make deploy"
+      - setStatus: "deployed"
+  - name: github-actions
+    image: registry.keyporttech.com:30243/github-actions:0.1.0
+    ciCommands:
+      - execute: "act"
+        setStatus: "github-actions"
+    cdCommands:
+      - execute: "act"
+        setStatus: "github-actions"
 ```
 
-### Generated Endpoints 
+### Example helm cicd pipeline
+### Example run github actions
+
+### Generated Endpoints
 The chart exposes pipelines as webhook endpoints through an ingress. Different  uris are generated for github and gitea. Using the above pipeline an ingress controller using tls would generate the following:
   * https://host/gitea/golang
   * https://host/gitea/nodejs
