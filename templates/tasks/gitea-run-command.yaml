@@ -44,7 +44,7 @@ spec:
       args:
         - "-cx"
         - |
-          for status in "${STATUS[@]}"
+          for status in "${STATUSES[@]}"
           do
             :
             # pending,success,error,failure,warning
@@ -74,7 +74,7 @@ spec:
       - name: COMMANDS
         value: "$(params.commands)"
       - name: STATUSES
-        value: "$(params.statuses)"
+        value: "( $(params.statuses) )"
       - name: GIT-REF
         value: $(params.ref)
       command:
