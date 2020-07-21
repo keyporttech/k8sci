@@ -48,7 +48,7 @@ spec:
                   exit 1
                 fi
                 # Cleanup pipelineruns first, as this will delete tasksruns too
-                tkn pr delete -n {{ .Release.namespace }} --keep {{ .Values.cleaner.maxJobsToKeep }}
+                tkn pr delete -n {{ .Release.Namespace }} --keep {{ .Values.cleaner.maxJobsToKeep }}
                 # Keep double the amount of tr, for standalone trs
-                tkn tr delete -n  {{ .Release.namespace }}  --keep {{ mul 2 .Values.cleaner.maxJobsToKeep }} #X2
+                tkn tr delete -n {{ .Release.Namespace }}  --keep {{ mul 2 .Values.cleaner.maxJobsToKeep }} #X2
           restartPolicy: Never
