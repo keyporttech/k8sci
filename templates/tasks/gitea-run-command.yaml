@@ -23,7 +23,6 @@ spec:
     - name: pipelineName
     - name: pipelineType
   results:
-    - name: status
     - name: description
     - name: output
   steps:
