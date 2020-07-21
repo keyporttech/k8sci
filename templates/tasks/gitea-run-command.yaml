@@ -42,7 +42,8 @@ spec:
       args:
         - "-cx"
         - |
-          STATUSES=($(param.statuses)
+          declare -a STATUSES
+          STATUSES=($(param.statuses))
           for status in "${STATUSES[@]}"
           do
             :
@@ -72,8 +73,6 @@ spec:
       {{- end }}
       - name: COMMANDS
         value: "$(params.commands)"
-      - name: STATUSES
-        value: ( $(params.statuses) )
       - name: GIT-REF
         value: $(params.ref)
       command:
@@ -84,6 +83,8 @@ spec:
           set +e;
           RESULT=0;
           INDEX=0;
+          declare -a STATUSES
+          STATUSES=($(param.statuses))
           for sommand in "${COMMANDS[@]}"
           do
              :
@@ -116,13 +117,13 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
-      - name: STATUSES
-        value: ( $(params.statuses) )
       command:
         - "bash"
       args:
         - "-cx"
         - |
+          declare -a STATUSES
+          STATUSES=($(param.statuses))
           for status in "${STATUSES[@]}"
           do
             :
