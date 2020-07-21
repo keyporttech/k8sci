@@ -43,7 +43,7 @@ spec:
         - "-cx"
         - |
           declare -a STATUSES
-          STATUSES=($(param.statuses))
+          STATUSES=($(params.statuses))
           for status in "${STATUSES[@]}"
           do
             :
@@ -84,7 +84,7 @@ spec:
           RESULT=0;
           INDEX=0;
           declare -a STATUSES
-          STATUSES=($(param.statuses))
+          STATUSES=($(params.statuses))
           for sommand in "${COMMANDS[@]}"
           do
              :
@@ -123,7 +123,7 @@ spec:
         - "-cx"
         - |
           declare -a STATUSES
-          STATUSES=($(param.statuses))
+          STATUSES=($(params.statuses))
           for status in "${STATUSES[@]}"
           do
             :
