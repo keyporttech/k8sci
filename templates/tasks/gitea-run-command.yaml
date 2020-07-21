@@ -18,6 +18,7 @@ spec:
     - name: ref
     - name: image
     - name: commands
+    - name: statuses
     - name: htmlurl
     - name: pipelineName
     - name: pipelineType
@@ -36,20 +37,16 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
-      - name: COMMANDS
-        value: "$(params.commands)"
+      - name: STATUSES
+        value: "$(params.statuses)"
       command:
         - "bash"
       args:
         - "-cx"
         - |
-          for commandBundle in "${COMMANDS[@]}"
+          for status in "${STATUS[@]}"
           do
             :
-            IFS=':';
-            read -ra commandArray <<< "$commandBundle";
-            command=${commandArray[0]};
-            status=${commandArray[1]};
             # pending,success,error,failure,warning
             curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
@@ -76,6 +73,8 @@ spec:
       {{- end }}
       - name: COMMANDS
         value: "$(params.commands)"
+      - name: STATUSES
+        value: "$(params.statuses)"
       - name: GIT-REF
         value: $(params.ref)
       command:
@@ -84,19 +83,17 @@ spec:
         - "-cx"
         - |
           set +e;
-          RESULT=0
-          for commandBundle in "${COMMANDS[@]}"
+          RESULT=0;
+          INDEX=0;
+          for status in "${COMMANDS[@]}"
           do
              :
-             IFS=':';
-             read -ra commandArray <<< "$commandBundle";
-             command=${commandArray[0]};
-             status=${commandArray[1]};
+             status=${STATUSES[$INDEX]};
              ${command} &>> /tekton/home/output;
              RESULT=$?;
-             [ $RESULT -ne 0 ] && echo "failure" > /tekton/home/status/${status} && break
-             [ $RESULT -eq 0 ] && echo "success" > /tekton/home/status/${status}
-
+             [ $RESULT -ne 0 ] && [ "$status" != "" ] && echo "failure" > /tekton/home/status/${status} && break
+             [ $RESULT -eq 0 ] && [ "$status" != "" ] && echo "success" > /tekton/home/status/${status}
+             ((INDEX++))
           done
           [ $RESULT -eq 0 ] && echo "succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
           cat /tekton/home/output;
@@ -120,22 +117,18 @@ spec:
             name: {{ $fullName }}
             key: {{ .name }}
       {{- end }}
-      - name: COMMANDS
-        value: "$(params.commands)"
+      - name: STATUSES
+        value: "$(params.statuses)"
       command:
         - "bash"
       args:
         - "-cx"
         - |
-          for commandBundle in "${COMMANDS[@]}"
+          for status in "${STATUSES[@]}"
           do
             :
-            IFS=':';
-            read -ra commandArray <<< "$commandBundle";
-            command=${commandArray[0]};
-            status=${commandArray[1]};
             # pending,success,error,failure,warning
-            curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            [ "$status" != "" ] && curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
             -H "Authorization: token ${GITEA_TOKEN}" \
             -H "Content-Type: application/json" -i -k -d "{\

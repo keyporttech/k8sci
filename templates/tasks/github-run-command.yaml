@@ -18,6 +18,7 @@ spec:
     - name: ref
     - name: image
     - name: commands
+    - name: statuses
     - name: htmlurl
     - name: pipelineName
     - name: pipelineType
