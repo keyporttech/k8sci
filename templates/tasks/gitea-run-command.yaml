@@ -214,7 +214,7 @@ spec:
         cp /secretsDir/*  /root/.ssh
         mv ~/.ssh/ssh-privatekey ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        mkdir -p /home/tekton/status
+        mkdir -p /tekton/home/status
     volumeMounts:
       - mountPath: /root/.ssh
         name: ssh-creds
