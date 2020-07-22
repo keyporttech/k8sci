@@ -52,7 +52,7 @@ spec:
             -H "Authorization: token ${GITEA_TOKEN}" \
             -H "Content-Type: application/json" -i -k -d "{\
               \"context\": \"${status}\",\
-              \"description\": \"started...\",\
+              \"description\": \"pending...\",\
               \"state\": \"pending\",\
               \"target_url\": \"{{ .Values.ingress.host }}/dashboard\"\
             };"
@@ -126,14 +126,17 @@ spec:
           for status in "${STATUSES[@]}"
           do
             :
+            description="check passed."
+            state=$(cat /tekton/home/status/${status})
+            [ "$state" != "success" ] && description="check did not pass."
             # pending,success,error,failure,warning
             [ "$status" != "" ] && curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
             -H "Authorization: token ${GITEA_TOKEN}" \
             -H "Content-Type: application/json" -i -k -d "{\
-              \"context\": \"$(params.pipelineName)\",\
-              \"description\": \"$(cat /tekton/home/description)\",\
-              \"state\": \"$(cat /tekton/home/status/${status})\",\
+              \"context\": \"$status\",\
+              \"description\": \"$description\",\
+              \"state\": \"$state\",\
               \"target_url\": \"{{ .Values.ingress.host }}/dashboard\"\
             }"
           done
