@@ -1,1 +1,0 @@
-# k8sCI cofig

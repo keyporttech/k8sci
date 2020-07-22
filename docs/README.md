@@ -3,3 +3,4 @@
 ## Chart values| Parameter | Description | Default |
 | ----------------------- | --------------------------------------------- | ---------------------------------------------------------- |
 | `pullPolicy` | `pull policy for all images` | `ifNotPresent` |
+| `imagePullSecrets` | image pull secrets | []` |
