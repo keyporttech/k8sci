@@ -42,16 +42,21 @@ spec:
       args:
         - "-cx"
         - |
-          # pending,success,error,failure
-          # /repos/:owner/:repo/statuses/:sha
-          curl -X POST {{ .Values.gitSources.github.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
-          -H "accept: application/json" \
-          -H "Authorization: token ${GITHUB_TOKEN}" \
-          -H "Content-Type: application/json" -i -k -d "{\
-            \"context\": \"$(params.pipelineName)\",\
-            \"description\": \"started...\",\
-            \"state\": \"pending\"
-          }"
+          declare -a STATUSES
+          STATUSES=($(params.statuses))
+          for status in "${STATUSES[@]}"
+          do
+            :
+            # pending,success,error,failure
+            # /repos/:owner/:repo/statuses/:sha
+            curl -X POST {{ .Values.gitSources.github.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            -H "accept: application/json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Content-Type: application/json" -i -k -d "{\
+              \"context\": \"$status\",\
+              \"description\": \"pending...\",\
+              \"state\": \"pending\"
+            }"
     - name: run
       image: "$(params.image)"
       workingDir: "/workspace/git-repo"

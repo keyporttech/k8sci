@@ -161,8 +161,8 @@ spec:
       args:
         - "-cx"
         - |
-          export STATUS=$(cat /tekton/home/status);
-          [ "$STATUS" != "success" ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
+          export SUCCEEDED=$(cat /tekton/home/description);
+          [ "$STATUS" != "succeeded." ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
           export SLACK_TITLE="${SYMBOL} gitea Pipeline: $(params.pipelineName) $(params.pipelineType)\n\nStatus: ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINE_RUN}|build information>";
           export SLACK_MESSAGE="message: $(params.commands) $(cat /tekton/home/description)";
           ## TODO SLACK API too picky with text - maybe giure out how to do a snippet
