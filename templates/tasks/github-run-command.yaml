@@ -57,6 +57,7 @@ spec:
               \"description\": \"pending...\",\
               \"state\": \"pending\"
             }"
+          done
     - name: run
       image: "$(params.image)"
       workingDir: "/workspace/git-repo"
