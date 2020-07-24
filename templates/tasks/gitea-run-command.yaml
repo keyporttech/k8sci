@@ -43,11 +43,22 @@ spec:
         - |
           declare -a STATUSES
           STATUSES=($(params.statuses))
+
+          # extract the protocol
+          proto="$(echo $(params.htmlurl) | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+
+          # remove the protocol
+          url=$(echo $(params.htmlurl) | sed -e s,$proto,,g)
+
+          # extract the host and port
+          hostport=$(echo $url |  cut -d/ -f1)
+          API_END_POINT=$hostport/api/v1
+
           for status in "${STATUSES[@]}"
           do
             :
             # pending,success,error,failure,warning
-            curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            curl -X POST ${API_END_POINT}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
             -H "Authorization: token ${GITEA_TOKEN}" \
             -H "Content-Type: application/json" -i -k -d "{\
@@ -123,6 +134,15 @@ spec:
         - |
           declare -a STATUSES
           STATUSES=($(params.statuses))
+          # extract the protocol
+          proto="$(echo $(params.htmlurl) | grep :// | sed -e's,^\(.*://\).*,\1,g')"
+
+          # remove the protocol
+          url=$(echo $(params.htmlurl) | sed -e s,$proto,,g)
+
+          # extract the host and port
+          hostport=$(echo $url |  cut -d/ -f1)
+          API_END_POINT=$hostport/api/v1
           for status in "${STATUSES[@]}"
           do
             :
@@ -130,7 +150,7 @@ spec:
             state=$(cat /tekton/home/status/${status})
             [ "$state" != "success" ] && description="check did not pass."
             # pending,success,error,failure,warning
-            [ "$status" != "" ] && curl -X POST {{ .Values.gitSources.gitea.apiEndPoint}}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            [ "$status" != "" ] && curl -X POST ${API_END_POINT}/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
             -H "accept: application/json" \
             -H "Authorization: token ${GITEA_TOKEN}" \
             -H "Content-Type: application/json" -i -k -d "{\
@@ -166,8 +186,8 @@ spec:
           export DESCRIPTION=$(cat /tekton/home/description);
           [ "$DESCRIPTION" != "succeeded." ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
           export SLACK_TITLE="${SYMBOL} gitea Pipeline: $(params.pipelineName) $(params.pipelineType)\n\nStatus: ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINE_RUN}|build information>";
-          export SLACK_MESSAGE="message: $(printf '%s\n' "${COMMANDS[@]}") $DESCRIPTION";
-          ## TODO SLACK API too picky with text - maybe giure out how to do a snippet
+          export SLACK_MESSAGE="$(printf '%s\n' "${COMMANDS[@]}")\n $DESCRIPTION";
+          ## TODO SLACK API too picky with text - figure out how to do a snippet
           # [ "$STATUS" != "success" ] && export SLACK_MESSAGE="\`\`\`$(cat /tekton/home/output | sed "s/\"/\\\"/g" | sed "s/'//g" | sed "s/\`/\\\`/g" )\`\`\`";
           PAYLOAD=$( cat <<EOT
           {

@@ -1,5 +1,7 @@
 {{- $fullName := include "k8sCI.fullname" . -}}
 {{- $labels := include "k8sCI.labels" . -}}
+
+{{- if .Values.gitSources.github }}
 {{- range .Values.cicdPipelines }}
 
 apiVersion: triggers.tekton.dev/v1alpha1
@@ -39,4 +41,5 @@ spec:
         name: "{{ $fullName }}-build"
 ---
 
+{{- end }}
 {{- end }}

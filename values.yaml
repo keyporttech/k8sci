@@ -7,12 +7,10 @@ pullPolicy: IfNotPresent
 imagePullSecrets: []
 
 gitSources:
-  gitea:
-    apiEndPoint: https://<GITEA_SERVER>/api/v1
-  github:
-    apiEndPoint: https://api.github.com
+  gitea: false
+  github: true
 
-# Job cleaner - prunes old jobs over a certain age
+# Job cleaner - prunes old jobs over max amount to keep
 cleaner:
   schedule: 12 * * * *
   maxJobsToKeep: 200
