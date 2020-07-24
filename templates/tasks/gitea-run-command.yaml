@@ -52,7 +52,7 @@ spec:
 
           # extract the host and port
           hostport=$(echo $url |  cut -d/ -f1)
-          API_END_POINT=$hostport/api/v1
+          API_END_POINT=${proto}${hostport}/api/v1
 
           for status in "${STATUSES[@]}"
           do
@@ -142,7 +142,7 @@ spec:
 
           # extract the host and port
           hostport=$(echo $url |  cut -d/ -f1)
-          API_END_POINT=$hostport/api/v1
+          API_END_POINT=${proto}${hostport}/api/v1
           for status in "${STATUSES[@]}"
           do
             :
