@@ -2,29 +2,30 @@
 
 ## Contents
 
-[Tekton Dependencies](#tektonDependencies)
-[Gitea dependencies](#giteaDependencies)
-[Pipelines](./PIPELINES.md)
-[Git commit statuses]()
-[Pipeline Secrets]()
-[git ssh config]()
-[Pipeline Examples]()
-[Ingress Config and Webhooks](./INGRESS_ENDPOINTS.md)
-[Git Sources]()
-[Webhook Endpoints]
-[Dshboard Ingress]
-[Creating a gitub webhook]
-[Creating a gitea webhook]
+* [Tekton Dependencies](#tekton-dependencies)
+* [Gitea Dependencies](#gitea-dependencies)
+* [Pipelines](./PIPELINES.md)
+* [Git commit statuses]()
+* [Pipeline Secrets]()
+    * [git ssh config]()
+* [Pipeline Examples]()
+* [Ingress Config and Webhooks](./INGRESS_ENDPOINTS.md)
+* [Git Sources]()
+* [Dshboard Ingress]()
+* [Webhook Endpoints]()
+* [Configuring a gitub webhook]()
+* [Configuring a gitea webhook]()
 
-[Chart Values](#chartValues)
+[Chart Values](#chart-values)
 
-## Tekton dependencies<a name="tektonDependencies"></a>
+## Tekton dependencies
 This chart uses the CRDs which are the release files supplied by tekton releases. Since tekton releases often and sometimes with breaking changes we pin a k8sci release to specific versions of tekton pipelines, tekton triggers and tekton dashboard. The specific crds files are included in the crds directory. Please note that deleting this chart will not remove the dependencies since they are not templated. Also changing the version of the CRDs outside of the chart risks breaking it. Finally please note that the tekton CRDs install resources in specific namespaces.
 
 ## Gitea dependencies<a name="giteaDependencies"></a>
 In order to process Gitea webhooks Tekton requires a specialized interceptor.
 
-## Chart values| Parameter | Description | Default |<a name="chartValues></a>
+## Chart values
+| Parameter | Description | Default |
 | ----------------------- | --------------------------------------------- | ---------------------------------------------------------- |
 | `pullPolicy` | `pull policy for all images` | `ifNotPresent` |
 | `imagePullSecrets` | `image pull secrets` | `[]` |

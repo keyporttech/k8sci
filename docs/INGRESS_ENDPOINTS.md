@@ -28,10 +28,10 @@ ingress:
       - dashboard.cicd.mydomain.com
 ```
 
-The ingress controller is mandatory because k8sci generates webhook endpoints based on the pipeline and git sources. Most clusters that host web applications will likely already have an ingress controller, but if not we recommend using the nginx ingress controller helm chart.
+The ingress controller is required because k8sci generates webhook endpoints based on the pipeline and git sources. Most clusters that host web applications will likely already have an ingress controller, but if not we recommend using the nginx ingress controller helm chart.
 
 ## Git Sources
-In k8sci a git source is defined as a system that hosts git repositories such as github. Currently k8sci supports github and gitea. Tekton supports other git sources and the plan is to add more over time. The k8sci authors will make an effort to support the smaller self hosted git sources like gitea and gogs as first class citizens. To configure a git source in your values.yaml:
+In k8sci a git source is defined as a system that hosts git repositories such as github. Currently k8sci supports github and gitea. Tekton supports other git sources and the plan is to add more over time. The k8sci authors will make an effort to support self hosted git sources like gitea and gogs as first class citizens. To configure a git source in your values.yaml:
 
 ```yaml
 gitSources:
@@ -84,8 +84,8 @@ Let's say we have a pipeline named helm-cicd-pipeline.
 In gitea configuring a web hook through the UI looks something like this:
 ![Gitea webhook](/docs/images/gitea-webhook.png)
 
-In github configuring the webhook for the same pipeline woul look like this:
-![Gitea webhook](/docs/images/gitea-webhook.png)
+In github configuring the webhook for the same pipeline looks like this:
+![Github webhook](/docs/images/githun-webhook.png)
 
 To use k8sCI you need to: install tekton pipeline, triggers, dashboard, install the k8sCI helm chart with the build image configured in the yaml, add web hooks to your source repo. k8sCI has been tested with both public github and gitea running on kuberenetes 1.18 on a bare-metal cluster.
 A k8s cluster with an ingress controller is mandatory for k8sci.
