@@ -25,8 +25,8 @@ spec:
               name: "{{ $fullName }}-gitea-validate"
               apiVersion: v1
       bindings:
-        - name: "{{ $fullName }}-push-gitea-tb"
-        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+        - ref: "{{ $fullName }}-push-gitea-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"
     - name: "{{$fullName }}-gitea-pr-{{ .name }}"
@@ -41,8 +41,8 @@ spec:
               name: "{{ $fullName }}-gitea-validate"
               apiVersion: v1
       bindings:
-        - name: "{{ $fullName }}-pr-gitea-tb"
-        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+        - ref: "{{ $fullName }}-pr-gitea-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"
 ---

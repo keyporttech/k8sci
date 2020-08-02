@@ -22,8 +22,8 @@ spec:
             eventTypes:
               - pull_request
       bindings:
-        - name: "{{ $fullName }}-pr-github-tb"
-        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+        - ref: "{{ $fullName }}-pr-github-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"
     - name: "{{ $fullName }}-github-push-{{ .name }}"
@@ -35,8 +35,8 @@ spec:
             eventTypes:
               - push
       bindings:
-        - name: "{{ $fullName }}-push-github-tb"
-        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+        - ref: "{{ $fullName }}-push-github-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"
 ---

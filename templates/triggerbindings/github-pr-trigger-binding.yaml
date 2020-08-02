@@ -13,9 +13,9 @@ spec:
   - name: contenttype
     value: $(header.Content-Type)
   - name: repo
-    value: $(body.pull_request.head.repo.name)
+    value: $(body.pull_request.base.repo.name)
   - name: org
-    value: $(body.pull_request.head.repo.owner.login)
+    value: $(body.pull_request.base.repo.owner.login)
   - name: ref
     value: $(body.pull_request.head.ref)
   - name: type

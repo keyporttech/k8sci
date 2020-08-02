@@ -1,120 +1,51 @@
-# k8sci configuration
+# k8sci Documentation
 
-## Chart values| Parameter | Description | Default |
+## Contents
+
+[Tekton Dependencies](#tektonDependencies)
+[Gitea dependencies](#giteaDependencies)
+[Pipelines](./PIPELINES.md)
+[Git commit statuses]()
+[Pipeline Secrets]()
+[git ssh config]()
+[Pipeline Examples]()
+[Ingress Config and Webhooks](./INGRESS_ENDPOINTS.md)
+[Git Sources]()
+[Webhook Endpoints]
+[Dshboard Ingress]
+[Creating a gitub webhook]
+[Creating a gitea webhook]
+
+[Chart Values](#chartValues)
+
+## Tekton dependencies<a name="tektonDependencies"></a>
+This chart uses the CRDs which are the release files supplied by tekton releases. Since tekton releases often and sometimes with breaking changes we pin a k8sci release to specific versions of tekton pipelines, tekton triggers and tekton dashboard. The specific crds files are included in the crds directory. Please note that deleting this chart will not remove the dependencies since they are not templated. Also changing the version of the CRDs outside of the chart risks breaking it. Finally please note that the tekton CRDs install resources in specific namespaces.
+
+## Gitea dependencies<a name="giteaDependencies"></a>
+In order to process Gitea webhooks Tekton requires a specialized interceptor.
+
+## Chart values| Parameter | Description | Default |<a name="chartValues></a>
 | ----------------------- | --------------------------------------------- | ---------------------------------------------------------- |
 | `pullPolicy` | `pull policy for all images` | `ifNotPresent` |
-| `imagePullSecrets` | image pull secrets | []` |
-
-gitSources:
-  gitea:
-    apiEndPoint: https://<GITEA_SERVER>/api/v1
-  github:
-    apiEndPoint: https://api.github.com
-
-# Job cleaner - prunes old jobs over a certain age
-cleaner:
-  schedule: 12 * * * *
-  maxJobsToKeep: 200
-
-# The cicd pipelines
-# each pipeline has a ci task run on push/pull request events
-# and a cd command run on merge protected branch (currently only master supported).
-# The defined image is used to run the command
-# example:
-# cicdPipelines:
-#   - name: nodejs
-#     image: registry.domain.com/node:12.13.0
-#     ciCommands:
-#       - "make build"
-#     cdCommands:
-#       - "make deploy"
-#   - name: golang
-#     image: registry.domain.com:golang:1.14.2-alpine
-#     ciCommand: "make build"
-#     cdCommand: "make deploy"
-
-# Send notifications for pipeline result
-# slackWebhook posts to slack
-notifications:
-  slackWebhook: https://hooks.slack.com/services/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
-
-# secret that stores env variables set in all pipelines
-pipelineEnvSecrets:
-  - name: GITHUB_USER
-    value: octocat
-  - name: GITHUB_TOKEN
-    value: token
-  - name: GITEA_USER
-    value: gitea
-  - name: GITEA_TOKEN
-    value: token
-
-# secret token use to encrypt payloads but github/gitea
-webhookSecretToken: "token_used_by_gihub/gitea"
-
-# gitAuthSsh:
-#   hosts:
-#    - <YOUR_HOST1>
-#   sshPrivatekey: your_key
-#   known_hosts: known_hosts_entry_to_your_ssh_server
-
-# gitAuthBasic:
-#   hosts:
-#    - <YOUR_HOST1>
-#   user: <YOUR_USER>
-#   password: your_password
-
-gitea:
-  apiServer: https://git.keyporttech.com:30243/api
-
-
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
-
-
-ingress:
-  enabled: false
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  host: chart-example.local
-  dashboardHost: dashboard.chart-example.local
-  # used for generating links to the dashboard
-  dashboardURL: 'https://dashboard.chart-example.local:<PORT>'
-  # tls:
-  #   - secretName: chart-example-tls
-  #     hosts:
-  #       - ccicd.example.com
-  # dashBoardTLS:
-  #   - secretName: dashboard-chart-example-tls
-  #     hosts:
-  #       - dashboard.cicd.example.com
-
-task-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+| `imagePullSecrets` | `image pull secrets` | `[]` |
+| `nameOverRide` | `Chart name override` | `` |
+| `fullNameOverRide` | `helm temnplate name override` | `` |
+| `gitSources.gitea` | `create gitea webhook endpoints?` | false |
+| `gitSources.github` | `create github webhook endpoints?` | true |
+| `cleaner.schedule` | `cron schedule job cleaner runs` | `12 * * * *` |
+| `cleaner.maxJobsToKeep` | | `# runs to keep when deleting` | `200` |
+| `cicdPipelines` | `list of pipelines - see [pipeline docs](./PIPELINES.md)` | `[]` |
+| `notifications.slackWebhook` | `if set sends notifications to slack` | `unset` |
+| `pipelineEnvSecrets` | `name/value list stored as k8s secrets and set as ENV values in pipeline run` | `[]` |
+| `webhookSecretToken` | `secret token in webhook payload as security validation` | `token_used_by_gihub/gitea` |
+| `gitAuthSsh.hosts` | `ssh host list used by tekton generated secret` | `unset` |
+| `gitAuth.sshPrivateKey` | `private ssh key text` | `unset` |
+| `gitAuth.known_hosts` | `ssh known_hosts file content` | `unset` |
+| `securityContext` | `not implemented` |  `{}` |
+| `ingress.annotations | 'annotations for all ingresses' {}
+| `ingress.host` | 'host name for hook ingresses' | 'chart-example.local` |
+| ingress.dashboardHost' | 'host names for dashboard host' | `dashboard.chart-example.local` |
+| `ingress.dashboardURL` | `used for generating links to the dashboard` | `https://dashboard.chart-example.local:<PORT>` |
+| ingress.tls | 'tls setting for hook ingresses' | `unset` |
+| `ingress.dashboardTLS` | `tls for dashboard ingress` | `unset` |
+| 'taskResources' | `not implemented` |  `{}` |

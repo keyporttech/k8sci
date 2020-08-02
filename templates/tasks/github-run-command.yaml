@@ -172,7 +172,7 @@ spec:
           COMMANDS=($(params.commands))
           export DESCRIPTION=$(cat /tekton/home/description);
           [ "$DESCRIPTION" != "succeeded." ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
-          export SLACK_TITLE="${SYMBOL} gitea Pipeline: $(params.pipelineName) $(params.pipelineType)\n\nStatus: ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINE_RUN}|build information>";
+          export SLACK_TITLE="${SYMBOL} github Pipeline: $(params.pipelineName) $(params.pipelineType)\n\nStatus: ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINE_RUN}|build information>";
           export SLACK_MESSAGE="$(printf '%s\n' "${COMMANDS[@]}")\n $DESCRIPTION";
           ## TODO SLACK API too picky with text - figure out how to do a snippet
           # [ "$STATUS" != "success" ] && export SLACK_MESSAGE="\`\`\`$(cat /tekton/home/output | sed "s/\"/\\\"/g" | sed "s/'//g" | sed "s/\`/\\\`/g" )\`\`\`";
@@ -232,6 +232,8 @@ spec:
         name: ssh-creds
       - mountPath: /secretsDir
         name: git-auth
+      - mountPath: /tekton/home
+        name: home
   volumes:
     - name: home
       emptyDir: {}

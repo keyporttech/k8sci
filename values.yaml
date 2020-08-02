@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+nameOverride: ""
+fullnameOverride: ""
+
 pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -62,13 +65,6 @@ webhookSecretToken: "token_used_by_gihub/gitea"
 #    - <YOUR_HOST1>
 #   user: <YOUR_USER>
 #   password: your_password
-
-gitea:
-  apiServer: https://git.keyporttech.com:30243/api
-
-
-nameOverride: ""
-fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
