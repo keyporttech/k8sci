@@ -5,7 +5,7 @@
 * [Tekton Dependencies](#tekton-dependencies)
 * [Gitea Dependencies](#gitea-dependencies)
 * [Pipelines](./PIPELINES.md)
-* [Git commit statuses](./PIPELINES.md#git-commit-statuses)
+* [Git commit statuses](./PIPELINES.md)(:name=git-commit-statuses)
 * [Pipeline Secrets](./PIPELINES.md#secrets)
     * [git ssh config](./PIPELINES.md#ssh-config)
 * [Pipeline Examples](./PIPELINES.md#examples)
