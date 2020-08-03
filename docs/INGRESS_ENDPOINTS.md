@@ -82,7 +82,7 @@ webhookSecretToken: MySecretToken
 Let's say we have a pipeline named helm-cicd-pipeline.
 
 In gitea configuring a web hook through the UI looks something like this:
-![Gitea webhook](/docs/images/gitea-webhook.png)
+![Gitea webhook](images/gitea-webhook.png)
 
 In github configuring the webhook for the same pipeline looks like this:
 ![Github webhook](/docs/images/githun-webhook.png)

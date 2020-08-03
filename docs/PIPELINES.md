@@ -27,13 +27,20 @@ cicdPipelines:
 * ciCommands - List of commands to run on continuous integration events. These are defined as PULL_REQUEST and PUSH events in both gitea and github.
   * execute - the command to run. Commands are run in the order the are listed inside a bash shell in the supplied image.
   * setStatus - Optional field that will set a commit status of the supplied value for the event's sha. Set's status to pending then either success or failure depending on the output of the command.
-* cdCommands - List of commands to run on continuous deployment. These commands are triggered when merges and when changes are pushed to the master branch. 'master' is hte only protected branch supported at this time.
+* cdCommands - List of commands to run on continuous deployment. These commands are triggered when merges and when changes are pushed to the master branch. 'master' is the only protected branch supported at this time.
   * execute - same as above for ciCommands
     setStatus - same as above for ciCommands
 
-## Secrets
+## Git Commit Statuses
+If the setStatus value is set in a pipeline:
+  * A status of "pending" with the set value sent be set by the pipeline before it runs.
+  * After running a status of "success" with be set if the xit code is zero or "failure" otherwise.
+  * If not setStatus name is specified then no status is set.
+  * This process applies to each command in a pipeline so multiple statuses may be set.
+  * This process works the same for both gitea and github
 
-Any secret value needed by you pipeline should be defined in pipelineEnvSecrets.
+## Secrets
+Any secret value needed by you pipeline should be defined in pipelineEnvSecrets. Both GITEA_TOKEN and GITHUB_TOKEN are needed to set commit statuses described above.
 
 ```yaml
 pipelineEnvSecrets:
@@ -47,7 +54,25 @@ pipelineEnvSecrets:
     value: token
 ```
 
-### Enabling Slack notifications
+## ssh config
+Tekton requires an ssh key and known host secrets to be created for each repo. These both should be defined in your values.yaml file. The value sshPrivateKey is the private key valued and added to either or both your gitea or github servers. K8sCI currently only supports a single ssh key that is shared across multiple servers. The value known_hosts is set in the running containers ~/.ssh directory to avoid host if validation. If this is not set properly the pipeline will hang indefinitely as it waits for the key to be validated. The known_hosts
+The value hosts is used by tekton to map a host name to a key. Be sure to list out all hosts including multiple gitea instances and github as needed.
+```yaml
+gitAuthSsh:
+  hosts:
+    - "gitea_host_dns_or_ip:<PORT>"
+    - "github.com"
+  sshPrivatekey: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    AAAAAAAAAAAAAAAAAA....
+    -----END OPENSSH PRIVATE KEY-----
+
+  known_hosts: |-
+    [gitea_host_dns_or_ip]:<PORT>,[##.##.##.##]:<PORT22 ecdsa-sha2-nistp256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...=
+    [github.com]:<PORT>,[##.##.##.##]:<PORT22 ecdsa-sha2-nistp256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...=
+```
+
+## Enabling Slack notifications
 
 If configured k8sci can send notifications using a (slack webhook)[https://api.slack.com/messaging/webhooks]. This can be configured as follows in your values.yaml:
 

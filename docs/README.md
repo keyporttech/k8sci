@@ -5,23 +5,23 @@
 * [Tekton Dependencies](#tekton-dependencies)
 * [Gitea Dependencies](#gitea-dependencies)
 * [Pipelines](./PIPELINES.md)
-* [Git commit statuses]()
-* [Pipeline Secrets]()
-    * [git ssh config]()
-* [Pipeline Examples]()
-* [Ingress Config and Webhooks](./INGRESS_ENDPOINTS.md)
-* [Git Sources]()
-* [Dshboard Ingress]()
-* [Webhook Endpoints]()
-* [Configuring a gitub webhook]()
-* [Configuring a gitea webhook]()
+* [Git commit statuses](./PIPELINES.md#git-commit-statuses)
+* [Pipeline Secrets](./PIPELINES.md#secrets)
+    * [git ssh config](./PIPELINES.md#ssh-config)
+* [Pipeline Examples](./PIPELINES.md#examples)
+* [Ingress Config and Webhooks](./INGRESS_ENDPOINTS.md#ingress-config)
+* [Git Sources](./INGRESS_ENDPOINTS.md#git-sources)
+* [Dashboard Ingress](./INGRESS_ENDPOINTS.md)
+* [Webhook Endpoints](./INGRESS_ENDPOINTS.md)
+* [Configuring a gitub/gitea webhooks](./INGRESS_ENDPOINTS.md#gitea-and-github-webhook-configuration)
+
 
 [Chart Values](#chart-values)
 
 ## Tekton dependencies
 This chart uses the CRDs which are the release files supplied by tekton releases. Since tekton releases often and sometimes with breaking changes we pin a k8sci release to specific versions of tekton pipelines, tekton triggers and tekton dashboard. The specific crds files are included in the crds directory. Please note that deleting this chart will not remove the dependencies since they are not templated. Also changing the version of the CRDs outside of the chart risks breaking it. Finally please note that the tekton CRDs install resources in specific namespaces.
 
-## Gitea dependencies<a name="giteaDependencies"></a>
+## Gitea dependencies
 In order to process Gitea webhooks Tekton requires a specialized interceptor.
 
 ## Chart values
