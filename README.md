@@ -30,7 +30,9 @@ K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech
 
 ## Getting started
 
-Define a [pipeline](./docs/PIPELINE.md) then run deploy it with the chart:
+Read the [docs](./docs/README.md)
+
+Define a [pipeline](./docs/PIPELINES.md) then run deploy it with the chart:
 
 ```bash
 helm repo add keyporttech https://keyporttech.github.io/helm-charts/
