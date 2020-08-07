@@ -2,23 +2,27 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+nameOverride: ""
+fullnameOverride: ""
 
 pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
 gitSources:
-  gitea:
-    apiEndPoint: https://<GITEA_SERVER>/api/v1
-  github:
-    apiEndPoint:  https://api.github.com
+  gitea: false
+  github: true
+
+# Job cleaner - prunes old jobs over max amount to keep
+cleaner:
+  schedule: 12 * * * *
+  maxJobsToKeep: 200
 
 # The cicd pipelines
 # each pipeline has a ci task run on push/pull request events
 # and a cd command run on merge protected branch (currently only master supported).
 # The defined image is used to run the command
-#example:
+# example:
 # cicdPipelines:
 #   - name: nodejs
 #     image: registry.domain.com/node:12.13.0
@@ -50,33 +54,18 @@ pipelineEnvSecrets:
 # secret token use to encrypt payloads but github/gitea
 webhookSecretToken: "token_used_by_gihub/gitea"
 
-#gitAuthSsh:
-#  hosts:
-#   - <YOUR_HOST1>
-#  sshPrivatekey: your_key
-#  known_hosts: known_hosts_entry_to_your_ssh_server
-
-#gitAuthBasic:
-#  hosts:
+# gitAuthSsh:
+#   hosts:
 #    - <YOUR_HOST1>
-#  user: <YOUR_USER>
-#  password: your_password
+#   sshPrivatekey: your_key
+#   known_hosts: known_hosts_entry_to_your_ssh_server
 
-gitea:
-  apiServer: https://git.keyporttech.com:30243/api
+# gitAuthBasic:
+#   hosts:
+#    - <YOUR_HOST1>
+#   user: <YOUR_USER>
+#   password: your_password
 
-
-nameOverride: ""
-fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
 
 securityContext: {}
   # capabilities:
@@ -96,14 +85,14 @@ ingress:
   dashboardHost: dashboard.chart-example.local
   # used for generating links to the dashboard
   dashboardURL: 'https://dashboard.chart-example.local:<PORT>'
-  #tls:
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - ccicd.example.com
-  #dashBoardTLS:
-  #  - secretName: dashboard-chart-example-tls
-  #    hosts:
-  #      - dashboard.cicd.example.com
+  # tls:
+  #   - secretName: chart-example-tls
+  #     hosts:
+  #       - ccicd.example.com
+  # dashBoardTLS:
+  #   - secretName: dashboard-chart-example-tls
+  #     hosts:
+  #       - dashboard.cicd.example.com
 
 task-resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -116,3 +105,6 @@ task-resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+
+serviceAccount:
+  annotations: {}

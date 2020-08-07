@@ -1,6 +1,7 @@
 apiVersion: v2
 name: k8sci
 description: A Helm chart for Kubernetes
+home: https://github.com/keyporttech/helm-k8sci
 
 # A chart can be either an 'application' or a 'library' chart.
 #

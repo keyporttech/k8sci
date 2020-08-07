@@ -17,15 +17,18 @@ spec:
     - name: git_sha
     - name: ref
     - name: image
-    - name: command
+    - name: commands
+    - name: statuses
     - name: htmlurl
+    - name: pipelineName
+    - name: pipelineType
   results:
     - name: status
     - name: description
+    - name: output
   steps:
-    - name: run
+    - name: post-pending-status-github
       image: "$(params.image)"
-      workingDir: "/workspace/git-repo"
       env:
       {{- range .Values.pipelineEnvSecrets }}
       - name: {{ .name }}
@@ -39,11 +42,62 @@ spec:
       args:
         - "-cx"
         - |
-          set +e;
-          $(params.command);
-          RESULT=$?
-          [ $RESULT -eq 0 ] && echo "success" > /tekton/home/status || echo "failure" > /tekton/home/status;
-          [ $RESULT -eq 0 ] && echo "build succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description
+          declare -a STATUSES
+          STATUSES=($(params.statuses))
+          for status in "${STATUSES[@]}"
+          do
+            :
+            # pending,success,error,failure
+            # /repos/:owner/:repo/statuses/:sha
+            curl -X POST https://api.github.com/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            -H "accept: application/json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Content-Type: application/json" -i -k -d "{\
+              \"context\": \"$status\",\
+              \"description\": \"pending...\",\
+              \"state\": \"pending\"
+            }"
+          done
+    - name: run
+      image: "$(params.image)"
+      workingDir: "/workspace/git-repo"
+      securityContext:
+        privileged: true
+      env:
+      {{- range .Values.pipelineEnvSecrets }}
+      - name: {{ .name }}
+        valueFrom:
+          secretKeyRef:
+            name: {{ $fullName }}
+            key: {{ .name }}
+      {{- end }}
+      - name: COMMANDS
+        value: "$(params.commands)"
+      - name: GIT-REF
+        value: $(params.ref)
+      command:
+        - "bash"
+      args:
+        - "-cx"
+        - |
+          RESULT=0;
+          INDEX=0;
+          declare -a STATUSES
+          STATUSES=($(params.statuses))
+          declare -a COMMANDS
+          COMMANDS=($(params.commands))
+          for command in "${COMMANDS[@]}"
+          do
+             :
+             status=${STATUSES[$INDEX]};
+             ${command} &>> /tekton/home/output;
+             RESULT=$?;
+             [ $RESULT -ne 0 ] && [ "$status" != "" ] && echo "failure" > /tekton/home/status/${status} && break
+             [ $RESULT -eq 0 ] && [ "$status" != "" ] && echo "success" > /tekton/home/status/${status}
+             ((INDEX++))
+          done
+          [ $RESULT -eq 0 ] && echo "succeeded." > /tekton/home/description || echo "build failed." > /tekton/home/description;
+          cat /tekton/home/output;
           exit 0;
       volumeMounts:
       - mountPath: /tekton/home
@@ -52,42 +106,106 @@ spec:
         name: dind-storage
       - mountPath: /var/run/
         name: dind-socket
-    - name: post-status
+      - mountPath: /root/.ssh
+        name: ssh-creds
+    - name: post-commit-status-github
       image: "$(params.image)"
+      env:
+      {{- range .Values.pipelineEnvSecrets }}
+      - name: {{ .name }}
+        valueFrom:
+          secretKeyRef:
+            name: {{ $fullName }}
+            key: {{ .name }}
+      {{- end }}
+      - name: PIPELINE_RUN
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.labels['tekton.dev/pipelineRun']
+      command:
+        - "bash"
+      args:
+        - "-cx"
+        - |
+          declare -a STATUSES
+          STATUSES=($(params.statuses))
+          for status in "${STATUSES[@]}"
+          do
+            :
+            description="check passed."
+            state=$(cat /tekton/home/status/${status})
+            [ "$state" != "success" ] && description="check did not pass."
+
+            # pending,success,error,failure
+            # /repos/:owner/:repo/statuses/:sha
+            curl -X POST https://api.github.com/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha) \
+            -H "accept: application/json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Content-Type: application/json" -i -k -d "{\
+              \"context\": \"$status\",\
+              \"description\": \"$desription\",\
+              \"state\": \"$state\"
+            }"
+          done
+      volumeMounts:
+      - mountPath: /tekton/home
+        name: home
+    {{- if .Values.notifications.slackWebhook }}
+    - name: slack-notify
+      image: "registry.keyporttech.com:30243/golang_1.14:0.1.0"
+      env:
+        - name: SLACK_WEBHOOK
+          value: {{ .Values.notifications.slackWebhook }}
+        - name: SLACK_USERNAME
+          value: "{{ $fullName }}"
+        - name: PIPELINE_RUN
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tekton.dev/pipelineRun']
       workingDir: "/workspace/git-repo"
       command:
         - "bash"
       args:
         - "-cx"
         - |
-          echo "posting status: status to github";
-          export AWS_DEFAULT_REGION=us-west-2;
-          export GITHUB_USER=$(aws ssm get-parameters --with-decryption  --names /cicd/github_user | jq .Parameters[0].Value | sed -e 's/^"//' -e 's/"$//');
-          export GITHUB_TOKEN=$(aws ssm get-parameters --with-decryption  --names /cicd/github_token | jq .Parameters[0].Value | sed -e 's/^"//' -e 's/"$//');
-          export STATE=$(cat /tekton/home/status)
-          export DESCRIPTION=$(cat /tekton/home/description)
-          curl -XPOST -u "${GITHUB_USER}:${GITHUB_TOKEN}" -d "{ \"state\":\"${STATE}\", \"description\": \"${DESCRIPTION}\", \"context\":\"watchdog-cicd\"}" https://api.github.com/repos/$(params.org)/$(params.repo)/statuses/$(params.git_sha)
+          declare -a COMMANDS
+          COMMANDS=($(params.commands))
+          export DESCRIPTION=$(cat /tekton/home/description);
+          [ "$DESCRIPTION" != "succeeded." ] && export SYMBOL=":no_entry:" || export SYMBOL=":thumbsup:";
+          export SLACK_TITLE="${SYMBOL} github Pipeline: $(params.pipelineName) $(params.pipelineType)\n\nStatus: ${STATUS}\n\nRepo: <$(params.htmlurl)|$(params.org)/$(params.repo)>\n\n<{{ .Values.ingress.dashboardURL }}/#/namespaces/cicd/pipelineruns/${PIPELINE_RUN}|build information>";
+          export SLACK_MESSAGE="$(printf '%s\n' "${COMMANDS[@]}")\n $DESCRIPTION";
+          ## TODO SLACK API too picky with text - figure out how to do a snippet
+          # [ "$STATUS" != "success" ] && export SLACK_MESSAGE="\`\`\`$(cat /tekton/home/output | sed "s/\"/\\\"/g" | sed "s/'//g" | sed "s/\`/\\\`/g" )\`\`\`";
+          PAYLOAD=$( cat <<EOT
+          {
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "$SLACK_TITLE"
+                }
+              },
+              {
+                "type": "divider"
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "$SLACK_MESSAGE"
+                }
+              }
+            ]
+          }
+          EOT
+          );
+          curl -d "$PAYLOAD" -H "Content-Type: application/json" -X POST $SLACK_WEBHOOK
+
       volumeMounts:
       - mountPath: /tekton/home
         name: home
-    - name: report-if-error
-      image: "$(params.image)"
-      workingDir: "/workspace/git-repo"
-      command:
-        - "bash"
-      args:
-        - "-cx"
-        - |
-          echo "slack notifcation if error";
-          export AWS_DEFAULT_REGION=us-west-2;
-          export SLACK_WEBHOOK=$(aws ssm get-parameters --with-decryption  --names /cicd/slack_webhook | jq .Parameters[0].Value | sed -e 's/^"//' -e 's/"$//');
-          export STATE=$(cat /tekton/home/status)
-          export DESCRIPTION=$(cat /tekton/home/description)
-          export VERSION=$(make version)
-          [ "$STATE" != "success" ] && slack-message "$(params.org)/$(params.repo) version=${VERSION} FAILURE: ${STATE}: ${DESCRIPTION}" danger
-      volumeMounts:
-      - mountPath: /tekton/home
-        name: home
+      {{- end }}
   sidecars:
   - image: docker:18.05-dind
     name: server
@@ -98,6 +216,24 @@ spec:
         name: dind-storage
       - mountPath: /var/run/
         name: dind-socket
+  - image: "$(params.image)"
+    name: init-ssh-creds
+    command:
+      - "sh"
+    args:
+      - "-c"
+      - |
+        cp /secretsDir/*  /root/.ssh
+        mv ~/.ssh/ssh-privatekey ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        mkdir -p /tekton/home/status
+    volumeMounts:
+      - mountPath: /root/.ssh
+        name: ssh-creds
+      - mountPath: /secretsDir
+        name: git-auth
+      - mountPath: /tekton/home
+        name: home
   volumes:
     - name: home
       emptyDir: {}
@@ -105,3 +241,8 @@ spec:
       emptyDir: {}
     - name: dind-socket
       emptyDir: {}
+    - name: ssh-creds
+      emptyDir: {}
+    - name: git-auth
+      secret:
+        secretName: "{{ $fullName }}-git-auth"

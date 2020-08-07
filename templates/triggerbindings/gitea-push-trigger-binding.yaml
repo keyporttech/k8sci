@@ -1,13 +1,13 @@
 apiVersion:  triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: {{ include "k8sCI.fullname" . }}-build-gitea-tb
+  name: {{ include "k8sCI.fullname" . }}-push-gitea-tb
   labels:
     {{- include "k8sCI.labels" . | nindent 4 }}
 spec:
   params:
   - name: gitrevision
-    value: $(body.commits[0].id)
+    value: $(body.after)
   - name: gitrepositorysshurl
     value: $(body.repository.ssh_url)
   - name: contenttype

@@ -1,6 +1,9 @@
 {{- $fullName := include "k8sCI.fullname" . -}}
 {{- $labels := include "k8sCI.labels" . -}}
+
+{{- if .Values.gitSources.gitea }}
 {{- range .Values.cicdPipelines }}
+
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
@@ -10,24 +13,39 @@ metadata:
 spec:
   serviceAccountName: {{ $fullName }}
   triggers:
-    - name: "{{$fullName }}-gitea-{{ .name }}"
+    - name: "{{$fullName }}-gitea-push-{{ .name }}"
       interceptors:
         - webhook:
             header:
               - name: X-Gitea-Event
                 value:
-                  - pull_request
                   - push
             objectRef:
               kind: Service
               name: "{{ $fullName }}-gitea-validate"
               apiVersion: v1
       bindings:
-        - name: "{{ $fullName }}-build-gitea-tb"
-        - name: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+        - ref: "{{ $fullName }}-push-gitea-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
         name: "{{ $fullName }}-build"
-
+    - name: "{{$fullName }}-gitea-pr-{{ .name }}"
+      interceptors:
+        - webhook:
+            header:
+              - name: X-Gitea-Event
+                value:
+                  - pull_request
+            objectRef:
+              kind: Service
+              name: "{{ $fullName }}-gitea-validate"
+              apiVersion: v1
+      bindings:
+        - ref: "{{ $fullName }}-pr-gitea-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-build"
 ---
 
+{{- end }}
 {{- end }}

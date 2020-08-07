@@ -1,0 +1,22 @@
+cicdPipelines:
+
+  - name: helm-cicd-pipeline
+    image: registry.keyporttech.com:30243/chart-testing:0.1.5
+    ciCommands:
+      - execute: "make lint"
+        setStatus: "lint"
+      - execute: "make install"
+        setStatus: "test"
+      - execute: "make check-version"
+        setStatus: "version-check"
+    cdCommands:
+      - execute: "make deploy"
+      - setStatus: "deployed"
+  - name: github-actions
+    image: registry.keyporttech.com:30243/github-actions:0.1.0
+    ciCommands:
+      - execute: "act"
+        setStatus: "github-actions"
+    cdCommands:
+      - execute: "act"
+        setStatus: "github-actions"

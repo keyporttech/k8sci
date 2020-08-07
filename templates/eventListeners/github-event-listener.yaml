@@ -1,0 +1,45 @@
+{{- $fullName := include "k8sCI.fullname" . -}}
+{{- $labels := include "k8sCI.labels" . -}}
+
+{{- if .Values.gitSources.github }}
+{{- range .Values.cicdPipelines }}
+
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: "{{ $fullName }}-gh-{{ .name }}"
+  labels:
+    {{- $labels | nindent 4 }}
+spec:
+  serviceAccountName: {{ $fullName }}
+  triggers:
+    - name: "{{ $fullName }}-github-pr-{{ .name }}"
+      interceptors:
+        - github:
+            secretRef:
+              secretName: {{ $fullName }}
+              secretKey: webhookSecretToken
+            eventTypes:
+              - pull_request
+      bindings:
+        - ref: "{{ $fullName }}-pr-github-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-build"
+    - name: "{{ $fullName }}-github-push-{{ .name }}"
+      interceptors:
+        - github:
+            secretRef:
+              secretName: {{ $fullName }}
+              secretKey: webhookSecretToken
+            eventTypes:
+              - push
+      bindings:
+        - ref: "{{ $fullName }}-push-github-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-build"
+---
+
+{{- end }}
+{{- end }}

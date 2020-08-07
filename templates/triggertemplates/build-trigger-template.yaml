@@ -57,10 +57,12 @@ spec:
     description: "run image"
   - name: ciCommands
     description: "continuous integration command"
-    type: array
+  - name: ciStatuses
+    description: "continuous integration statuses"
   - name: cdCommands
     description: "continuous delivery command"
-    type: array
+  - name: cdStatuses
+    description: "continuous delivery statuses"
   - name: type
     description: "type of pipeline: ex gitea/github"
   - name: htmlurl
@@ -93,6 +95,8 @@ spec:
                 value: $(params.image)
               - name: commands
                 value: $(params.ciCommands)
+              - name: statuses
+                value: $(params.ciStatuses)
               - name: htmlurl
                 value: $(params.htmlurl)
               - name: pipelineType
@@ -124,6 +128,8 @@ spec:
                 value: $(params.image)
               - name: commands
                 value: $(params.cdCommands)
+              - name: statuses
+                value: $(params.cdStatuses)
               - name: htmlurl
                 value: $(params.htmlurl)
               - name: pipelineType

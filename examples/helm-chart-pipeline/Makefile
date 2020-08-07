@@ -17,17 +17,6 @@ RELEASED_VERSION = $(shell helm repo add keyporttech https://keyporttech.github.
 REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 CWD = $(shell pwd)
 
-# PIN to TEKTON versions
-TEKTON_PIPELINE_VERSION=v0.14.3
-TEKTON_TRIGGERS_VERISON=v0.6.1
-TEKTON_DASHBOARD_VERSION=v0.8.2
-
-# Downloads the versioned tekton-releases and puts them in the crds folder
-download-tekton:
-	curl -o crds/1_tekton-pipeline-$(TEKTON_PIPELINE_VERSION).yaml https://storage.googleapis.com/tekton-releases/pipeline/previous/$(TEKTON_PIPELINE_VERSION)/release.yaml
-	curl -o crds/2_tekton-triggers-$(TEKTON_TRIGGERS_VERISON).yaml https://storage.googleapis.com/tekton-releases/triggers/previous/$(TEKTON_TRIGGERS_VERISON)/release.yaml
-	curl -o crds/3_tekton-dashboard-$(TEKTON_DASHBOARD_VERSION).yaml https://storage.googleapis.com/tekton-releases/dashboard/previous/$(TEKTON_DASHBOARD_VERSION)/tekton-dashboard-release.yaml
-.PHONY: download-tekton
 
 lint:
 	@echo "linting..."
@@ -55,24 +44,7 @@ build: lint test
 
 .PHONY: build
 
-publish-local-registry:
-	REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
-	@echo "publishing to ${REGISTRY_TAG}"
-	HELM_EXPERIMENTAL_OCI=1 helm chart save ./ ${REGISTRY_TAG}
-	# helm chart export  ${REGISTRY_TAG}
-	HELM_EXPERIMENTAL_OCI=1 helm chart push ${REGISTRY_TAG}
-	@echo "OK"
-.PHONY: publish-local-registry
 
-publish-public-repository:
-	#docker run -e GITHUB_TOKEN=${GITHUB_TOKEN} -v `pwd`:/charts/$(CHART) registry.keyporttech.com:30243/chart-testing:0.1.4 bash -cx " \
-	#	echo $GITHUB_TOKEN; \
-	rm -f *.tgz
-	helm package .;
-	curl -o releaseChart.sh https://raw.githubusercontent.com/keyporttech/helm-charts/master/scripts/releaseChart.sh; \
-	chmod +x releaseChart.sh; \
-	./releaseChart.sh $(CHART) $(VERSION) $(CWD);
-.PHONY: publish-public-repository
 
 deploy: publish-local-registry publish-public-repository
 	rm -rf /tmp/helm-$(CHART)

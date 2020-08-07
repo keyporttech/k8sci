@@ -1,110 +1,97 @@
 # k8sCI
 
-This is the CI/CD system in use at keyporttech. It is an implementation of [tekton/pipeline](https://github.com/tektoncd/pipeline) [tekton/trigger](https://github.com/tektoncd/triggers) packaged into a helm chart.
+K8sci is a simple powerful CI/CD system packaged as a helm chart. It is an implementation of [tekton pipeline](https://github.com/tektoncd/pipeline) [tekton trigger](https://github.com/tektoncd/triggers) and [tekton dashboard](https://github.com/tektoncd/dashboard).
 
-[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed specifically for running jobs and pipelines.The combination of Helm and Tekton pipelines creates a flexible robust pipeline templating mechanism. Pipelines are defined in a helm values.yaml file:
-  * name: name of the pipeline
-  * image: docker image that runs the build
-  * ciCommands: array of commands to run on git push events ex: - make build, but can be anything
-  * cdCommands: array of commands to run when code is pushed to master. Ex: - make deploy
+[Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed for running tasks and pipelines. The combination of Helm and Tekton pipelines creates a flexible robust pipeline templating mechanism. Everything is a native kubernetes object.
 
-Example:
+K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech uses and exercises k8sci in all of its pipelines so it is production tested, and we immediately fix any issues.
 
-```yaml
-cicdPipelines:
-  - name: nodejs
-    image: registry.keyporttech.com/node:12.13.0
-    ciCommands:
-      - "make build"
-    cdCommands:
-      - "make deploy"
-  - name: golang
-    image: registry.keyporttech.com/golang:1.14.2-alpine
-    ciCommands:
-      - "make compile"
-      - "make test"
-    cdCommands:
-      - "make deploy"
-```
+### Features
+  * Easy to use and flexible yaml pipeline definitions in a helm values.yaml.
+  * A focus on essential cicd functionality: execution, webhooks, and notification.
+  * Docker image based.
+  * Pipelines only limited by the docker build images used. Supports anything from a simple Makefile to even running github actions.
+  * A flexible architecture that can support multiple github source repo types. Currently supports github and gitea.
+  * Auto generated pipeline webhook endpoints exposed through a kubernetes ingress controller.
+  * Full UI interface through the [tekton dashboard](https://github.com/tektoncd/dashboard)
+  * Allows for the development of secure cicd by allowing implementation to be hidden in a docker container.
+  * Github commit status notifications per pipeline.
+  * Slack webhook notifications.
+  * Secrets configured in helm values file generate kubernetes secrets that are expose as environment variables.
 
-The chart exposes pipelines as webhook endpoints through an ingress. Different  uris are generated for github and gitea. Using the above pipeline an ingress controller using tls would generate the following:
-  * https://host/gitea/golang
-  * https://host/gitea/nodejs
-  * https://host/github/golang
-  * https://host/github/nodejs
+### Prerequisites
 
-Separate /gitea and /github endpoints are needed because the webhook payloads are different. Currently only github and gitea are supported, but other git hosting services could be easily added. (PRs would are appreciated)
+  1.) A running modern supported version of kubernetes.
 
-To use k8sCI you need to: install tecton pipeline, triggers, dashboard, install the k8sCI helm chart with the build image configured in the yaml, add web hooks to your source repo. k8sCI has been tested with both public github and gitea running on kuberenetes 1.18 on a bare-metal cluster.
-A k8s cluster with an ingress controller is mandatory for k8sci.
+  2.) An ingress controller installed on your cluster. This chart was tested and developed against nginx ingress controller, which is easily installed and configured through a [helm chart](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
 
-k8sCI provides and excellent starting point if further customization is needed. You would need to modify the tekton components, but it should save a lot of time in set up.
+  3.) (Helm 3)[https://v3.helm.sh/docs/intro/install/] installed.
 
 
-## Installation
+## Getting started
 
+Read the [docs](./docs/README.md)
 
-### prerequisites
-
-1.) A running modern supported version of kubernetes. An ingress controller is required. This chart was tested and developed against nginx ingress controller, which is easily installed and configured through a [helm chart](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
-
-2.) Tekton CRDs installed on the cluster. The tekton CRDs are deliberately left out of the helm chart, since they have their own install distributions and are evolving rapidly. They will be included as part of the chart in later releases.
+Define a [pipeline](./docs/PIPELINES.md) then run deploy it with the chart:
 
 ```bash
-# pipelines
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-
-# triggers
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-
-# dashboard
-kubectl apply --filename https://github.com/tektoncd/dashboard/releases/download/v0.6.1/tekton-dashboard-release.yaml
-
+helm repo add keyporttech https://keyporttech.github.io/helm-charts/
+helm install keyporttech/k8sci -f my_pipeline.yaml
 ```
-
-3.) (Helm 3)[https://v3.helm.sh/docs/intro/install/] installed.
-
-### install k8sCI helm chart
-
+or install locally
 ```bash
 # CLONE THIS REPO then:
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
 
 ```
-
-## Configuration and usage
-
-### Ingress configuration
-
-An ingress controller is required by k8sci since ingress endpoints are generated based on pipeline settings. A separate ingress is generated for the tekton dashboard.
-
-example ingress yaml values:
+### Example pipelines
 
 ```yaml
-ingress:
-  enabled: true
-  host: cicd.host.com
-  dashboardHost: dashboard.host.com
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/ingress.allow-http: "false"
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+cicdPipelines:
+  - name: nodejs
+    image: keyporttech/node:12.13.0
+    ciCommands:
+      - execute: "make build"
+        setStatus: "build"
+    cdCommands:
+      - execute: "make deploy"
+        setStatus: "deploy"
+  - name: golang
+    image: keyporttech/golang:1.14.2-alpine
+    ciCommands:
+      - excute: "make build"
+        setStatus: build
+    cdCommands:
+      - execute: "make deploy"
+        setstatus: "deploy"
+  - name: helm
+    image: keyporttech/chart-testing:0.1.5
+    ciCommands:
+      - execute: "make lint"
+        setStatus: "lint"
+      - execute: "make install"
+        setStatus: "test"
+      - execute: "make check-version"
+        setStatus: "version-check"
+    cdCommands:
+      - execute: "make deploy"
+      - setStatus: "deployed"
+  - name: github-actions
+    image: registry.keyporttech.com:30243/github-actions:0.1.0
+    ciCommands:
+      - execute: "act"
+        setStatus: "github-actions"
+    cdCommands:
+      - execute: "act"
+        setStatus: "github-actions"
 ```
 
+For more detailed examples see
+### Example helm cicd pipeline
+### Example run github actions
 
-### Enabling Slack notifications
 
-If configured k8sci can send notifications using a (slack webhook)[https://api.slack.com/messaging/webhooks]. This can be configured as follows in your values.yaml:
-
-```yaml
-slack-notify:
-  slack-webhook: "https://hooks.slack.com/services/TTTTTTTTT/B011111111111111111111111111111111"
-```
-
-### Example values.yaml
+### A full Example values.yaml
 
 ```yaml
 gitSources:
