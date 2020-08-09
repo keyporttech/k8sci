@@ -13,7 +13,7 @@ metadata:
 spec:
   serviceAccountName: {{ $fullName }}
   triggers:
-    - name: "{{$fullName }}-gitea-push-{{ .name }}"
+    - name: "{{$fullName }}-gitea-push-{{ .name }}-ci"
       interceptors:
         - webhook:
             header:
@@ -28,8 +28,8 @@ spec:
         - ref: "{{ $fullName }}-push-gitea-tb"
         - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
-        name: "{{ $fullName }}-build"
-    - name: "{{$fullName }}-gitea-pr-{{ .name }}"
+        name: "{{ $fullName }}-ci"
+    - name: "{{$fullName }}-gitea-pr-{{ .name }}-ci"
       interceptors:
         - webhook:
             header:
@@ -44,7 +44,39 @@ spec:
         - ref: "{{ $fullName }}-pr-gitea-tb"
         - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
-        name: "{{ $fullName }}-build"
+        name: "{{ $fullName }}-ci"
+    - name: "{{$fullName }}-gitea-push-{{ .name }}-cd"
+      interceptors:
+        - webhook:
+            header:
+              - name: X-Gitea-Event
+                value:
+                  - push
+            objectRef:
+              kind: Service
+              name: "{{ $fullName }}-gitea-validate"
+              apiVersion: v1
+      bindings:
+        - ref: "{{ $fullName }}-push-gitea-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-cd"
+    - name: "{{$fullName }}-gitea-pr-{{ .name }}-cd"
+      interceptors:
+        - webhook:
+            header:
+              - name: X-Gitea-Event
+                value:
+                  - pull_request
+            objectRef:
+              kind: Service
+              name: "{{ $fullName }}-gitea-validate"
+              apiVersion: v1
+      bindings:
+        - ref: "{{ $fullName }}-pr-gitea-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-cd"
 ---
 
 {{- end }}

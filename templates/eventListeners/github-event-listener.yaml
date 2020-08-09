@@ -13,7 +13,7 @@ metadata:
 spec:
   serviceAccountName: {{ $fullName }}
   triggers:
-    - name: "{{ $fullName }}-github-pr-{{ .name }}"
+    - name: "{{ $fullName }}-github-pr-{{ .name }}-ci"
       interceptors:
         - github:
             secretRef:
@@ -25,8 +25,8 @@ spec:
         - ref: "{{ $fullName }}-pr-github-tb"
         - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
-        name: "{{ $fullName }}-build"
-    - name: "{{ $fullName }}-github-push-{{ .name }}"
+        name: "{{ $fullName }}-ci"
+    - name: "{{ $fullName }}-github-push-{{ .name }}-ci"
       interceptors:
         - github:
             secretRef:
@@ -38,7 +38,33 @@ spec:
         - ref: "{{ $fullName }}-push-github-tb"
         - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
       template:
-        name: "{{ $fullName }}-build"
+        name: "{{ $fullName }}-ci"
+    - name: "{{ $fullName }}-github-pr-{{ .name }}-cd"
+      interceptors:
+        - github:
+            secretRef:
+              secretName: {{ $fullName }}
+              secretKey: webhookSecretToken
+            eventTypes:
+              - pull_request
+      bindings:
+        - ref: "{{ $fullName }}-pr-github-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-cd"
+    - name: "{{ $fullName }}-github-push-{{ .name }}-cd"
+      interceptors:
+        - github:
+            secretRef:
+              secretName: {{ $fullName }}
+              secretKey: webhookSecretToken
+            eventTypes:
+              - push
+      bindings:
+        - ref: "{{ $fullName }}-push-github-tb"
+        - ref: "{{ $fullName }}-pipeline-{{ .name }}-tb"
+      template:
+        name: "{{ $fullName }}-cd"
 ---
 
 {{- end }}
