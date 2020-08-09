@@ -14,7 +14,7 @@
 * [Dashboard Ingress](./INGRESS_ENDPOINTS.md)
 * [Webhook Endpoints](./INGRESS_ENDPOINTS.md)
 * [Configuring a gitub/gitea webhooks](./INGRESS_ENDPOINTS.md#gitea-and-github-webhook-configuration)
-
+* [Examples](../examples)
 
 [Chart Values](#chart-values)
 
