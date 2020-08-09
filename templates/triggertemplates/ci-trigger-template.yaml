@@ -84,7 +84,7 @@ spec:
               params:
                 - name: ref
                   value: $(params.ref)
-        resources:
+      resources:
         - name: source-repo
           resourceSpec:
             type: git
