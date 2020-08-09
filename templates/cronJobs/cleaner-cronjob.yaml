@@ -14,7 +14,6 @@
 # limitations under the License.
 {{ $fullName := include "k8sCI.fullname" . }}
 {{ $labels := include "k8sCI.labels" . }}
-
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
