@@ -1,0 +1,32 @@
+{{- $fullName := include "k8sCI.fullname" . -}}
+{{- $labels := include "k8sCI.labels" . -}}
+
+apiVersion:  tekton.dev/v1alpha1
+kind: Condition
+metadata:
+  name: "{{ $fullName }}-master-merge"
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  params:
+    - name: "ref"
+  check:
+    image: alpine
+    script: 'test "$(params.ref)" == "refs/heads/master"'
+
+---
+
+apiVersion:  tekton.dev/v1alpha1
+kind: Condition
+metadata:
+  name: "{{ $fullName }}-non-master-branch"
+  labels:
+    {{- include "k8sCI.labels" . | nindent 4 }}
+spec:
+  params:
+    - name: "ref"
+  check:
+    image: alpine
+    script: 'test "$(params.ref)" != "refs/heads/master"'
+
+---

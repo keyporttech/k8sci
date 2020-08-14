@@ -80,12 +80,3 @@ If configured k8sci can send notifications using a (slack webhook)[https://api.s
 slack-notify:
   slack-webhook: "https://hooks.slack.com/services/TTTTTTTTT/B011111111111111111111111111111111"
 ```
-
-
-## Examples
-
-### Example 1 a simple Makefile pipeline
-### Example 2 a simple golang pipeline with Makefile
-### Example 3 a nodejs pipeline with Makefile
-### Example 4 a pipeline for helm charts
-### Example 5 a working pipeline combining all of the above
