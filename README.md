@@ -25,14 +25,14 @@ K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech
 
   2.) An ingress controller installed on your cluster. This chart was tested and developed against nginx ingress controller, which is easily installed and configured through a [helm chart](https://kubernetes.github.io/ingress-nginx/deploy/#using-helm)
 
-  3.) (Helm 3)[https://v3.helm.sh/docs/intro/install/] installed.
+  3.) [Helm 3](https://v3.helm.sh/docs/intro/install/) installed.
 
 
 ## Getting started
 
 Read the [docs](./docs/README.md)
 
-Define a [pipeline](./docs/PIPELINES.md) then run deploy it with the chart:
+Define a [pipeline](./docs/PIPELINES.md) then run deploy it with helm:
 
 ```bash
 helm repo add keyporttech https://keyporttech.github.io/helm-charts/
@@ -44,7 +44,7 @@ or install locally
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
 
 ```
-### Example pipelines
+#### [Example pipelines](./examples)
 
 ```yaml
 cicdPipelines:
@@ -85,10 +85,6 @@ cicdPipelines:
       - execute: "act"
         setStatus: "github-actions"
 ```
-
-For more detailed examples see
-### Example helm cicd pipeline
-### Example run github actions
 
 
 ### A full Example values.yaml
