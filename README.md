@@ -1,6 +1,6 @@
 # k8sCI
 
-K8sci is a simple powerful CI/CD system packaged as a helm chart. It is an implementation of [tekton pipeline](https://github.com/tektoncd/pipeline) [tekton trigger](https://github.com/tektoncd/triggers) and [tekton dashboard](https://github.com/tektoncd/dashboard).
+K8sci is a simple powerful CI/CD system packaged as a helm chart. It is an implementation of [tekton pipeline](https://github.com/tektoncd/pipeline) [tekton triggers](https://github.com/tektoncd/triggers) and [tekton dashboard](https://github.com/tektoncd/dashboard).
 
 [Tekton pipelines](https://github.com/tektoncd/pipeline) are kubernetes custom resource definitions designed for running tasks and pipelines. The combination of Helm and Tekton pipelines creates a flexible robust pipeline templating mechanism. Everything is a native kubernetes object.
 

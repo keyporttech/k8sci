@@ -12,9 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-k8sci is installed in namespace {{ .Release.namespace }}
+{{- $namespace := "default" -}}
+{{- if .Release.namespace  }}
+{{- $namespace := .Release.namespace }}
+{{- end }}
+k8sci is installed in namespace {{ $namespace }}
 
-{{- if .Values.ingress.enabled }}
+
 Webhook urls
 {{- $host := .Values.ingress.host -}}
 {{- range .Values.build_images }}
@@ -24,11 +28,11 @@ Webhook urls
   {{- end }}
 {{- end }}
 
-{{- end }}
+
 
 To view the generated objects:
 
-kubectl get TriggerTemplate -n  {{ .Release.namespace }}
-kubectl get TriggerTemplate -n  {{ .Release.namespace }}
-kubectl get Tasks -n  {{ .Release.namespace }}
-kubectl get el -n  {{ .Release.namespace }}
+kubectl get TriggerTemplate -n  {{ $namespace }}
+kubectl get TriggerTemplate -n  {{ $namespace}}
+kubectl get Tasks -n  {{ $namespace }}
+kubectl get el -n  {{ $namespace}}
