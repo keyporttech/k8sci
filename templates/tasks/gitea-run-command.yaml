@@ -168,9 +168,10 @@ spec:
       image: "$(params.image)"
       env:
         - name: SLACK_WEBHOOK
-          value: {{ .Values.notifications.slackWebhook }}
-        - name: SLACK_USERNAME
-          value: "{{ $fullName }}"
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}
+              key: slackWebhook
         - name: PIPELINE_RUN
           valueFrom:
             fieldRef:

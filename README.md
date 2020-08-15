@@ -119,7 +119,7 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     kubernetes.io/tls-acme: "true"
 
-slack-notify:
+notifications:
   slack-webhook: "https://hooks.slack.com/services/TTTTTTTTT/B011111111111111111111111111111111"
 
 pipelineEnvSecrets:
