@@ -38,7 +38,7 @@ cleaner:
 # Send notifications for pipeline result
 # slackWebhook posts to slack
 notifications:
-  slackWebhook: https://hooks.slack.com/services/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
+  slackWebhook: https://hooks.slack.com/services/TTTTTTTTTT/B000000000/b1234567890ABCDEF123456
 
 # secret that stores env variables set in all pipelines
 pipelineEnvSecrets:
