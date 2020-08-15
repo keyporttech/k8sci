@@ -10,7 +10,7 @@ sources:
 maintainers:
   - name: John Felten
     email: john.felten@gmail.com
-
+icon: https://raw.githubusercontent.com/keyporttech/k8sci/master/scripts/images/lock.png
 type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
