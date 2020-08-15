@@ -18,7 +18,6 @@
 {{- end }}
 k8sci is installed in namespace {{ $namespace }}
 
-
 Webhook urls
 {{- $host := .Values.ingress.host -}}
 {{- range .Values.build_images }}
