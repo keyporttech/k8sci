@@ -33,7 +33,7 @@ kubectl apply -f ./crds
 ```
 
 ## Other dependencies
-In order to process gitea webhooks Tekton requires [a specialized interceptor](https://github.com/tektoncd/triggers/blob/master/docs/eventlisteners.md#interceptors). We built a [gitea interceptor for tekton triggers](https://github.com/keyporttech/gitea-tekton-interceptor/graphs/traffic). k8sci uses the image built from this project.
+In order to process gitea webhooks Tekton requires [a specialized interceptor](https://github.com/tektoncd/triggers/blob/master/docs/eventlisteners.md#interceptors). We built a [gitea interceptor for tekton triggers](https://github.com/keyporttech/gitea-tekton-interceptor). k8sci uses the image built from this project.
 
 ## Contributing
 We welcome contributions to k8sci nad especially apprciate pull requests that enable other git sources. Please see [keyporttech charts contribution guidelines](https://github.com/keyporttech/helm-charts/blob/master/CONTRIBUTING.md).
