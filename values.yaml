@@ -9,6 +9,9 @@ pullPolicy: IfNotPresent
 
 imagePullSecrets: []
 
+giteaInterceptor:
+  image: keyporttech/gitea-webbhook-interceptor:0.1.0
+
 gitSources:
   gitea: false
   github: true

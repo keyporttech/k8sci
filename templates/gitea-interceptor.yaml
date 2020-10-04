@@ -32,7 +32,7 @@ spec:
       serviceAccountName: {{ include "k8sCI.fullname" . }}
       containers:
         - name: validate
-          image: registry.keyporttech.com:30243/gitea-webbhook-interceptor:v0.1
+          image: {{ .Values.giteaInterceptor.image }}
           imagePullPolicy: Always
           env:
             - name: GITEA_SECRET_TOKEN
