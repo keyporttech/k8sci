@@ -10,7 +10,7 @@ pullPolicy: IfNotPresent
 imagePullSecrets: []
 
 giteaInterceptor:
-  image: keyporttech/gitea-webbhook-interceptor:0.1.0
+  image: keyporttech/gitea-webhook-interceptor:0.1.1
 
 gitSources:
   gitea: false
