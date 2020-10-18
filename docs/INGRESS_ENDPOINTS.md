@@ -85,9 +85,16 @@ In gitea configuring a web hook through the UI looks something like this:
 ![Gitea webhook](images/gitea-webhook.png)
 
 In github configuring the webhook for the same pipeline looks like this:
-![Github webhook](/docs/images/githun-webhook.png)
+![Github webhook](/docs/images/github-webhook.png)
 
-To use k8sCI you need to: install tekton pipeline, triggers, dashboard, install the k8sCI helm chart with the build image configured in the yaml, add web hooks to your source repo. k8sCI has been tested with both public github and gitea running on kuberenetes 1.18 on a bare-metal cluster.
-A k8s cluster with an ingress controller is mandatory for k8sci.
+# Exposing endpoints to github or the Internet
+Please do not expose k8sci endpoints publicly unprotected.
 
-k8sCI provides and excellent starting point if further customization is needed. You would need to modify the tekton components, but it should save a lot of time in set up.
+In order for github to use k8sci endpoints they need to be exposed on the Internet. In addition to the webhook secret we strongly suggest limiting acecss to the known github webhook egress ips. Most cloud providers will have a solution for this: ex aws security groups. If not on a cloud most firewalls and or even home routers can do this as well.
+
+The github ip ranges are [here](https://api.github.com/meta). At the time of this writing the github webhook ips rangers are:
+```
+"192.30.252.0/22",
+"185.199.108.0/22",
+"140.82.112.0/20"
+```

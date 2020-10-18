@@ -131,9 +131,7 @@ pipelineEnvSecrets:
     value: AAAAAAAA
   - name: GITEA_TOKEN
     value: AAAAAAAAAAAA
-
 webhookSecretToken: k8sRocks!
-
 gitAuthSsh:
   hosts:
     - "host_dns_or_ip:<PORT>"
@@ -141,7 +139,6 @@ gitAuthSsh:
     -----BEGIN OPENSSH PRIVATE KEY-----
     AAAAAAAAAAAAAAAAAA....
     -----END OPENSSH PRIVATE KEY-----
-
   known_hosts: |-
     [host.com]:<PORT>,[##.##.##.##]:<PORT22 ecdsa-sha2-nistp256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...=
 ```
