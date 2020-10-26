@@ -152,7 +152,7 @@ spec:
         name: home
     {{- if .Values.notifications.slackWebhook }}
     - name: slack-notify
-      image: "registry.keyporttech.com:30243/golang_1.14:0.1.0"
+      image: "$(params.image)"
       env:
         - name: SLACK_WEBHOOK
           valueFrom:
