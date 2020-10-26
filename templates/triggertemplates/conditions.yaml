@@ -12,7 +12,7 @@ spec:
     - name: "ref"
   check:
     image: alpine
-    script: 'test "$(params.ref)" == "refs/heads/master"'
+    script: 'test "$(params.ref)" == "refs/heads/master" || "$(params.ref)" == "refs/heads/main"'
 
 ---
 
@@ -27,6 +27,6 @@ spec:
     - name: "ref"
   check:
     image: alpine
-    script: 'test "$(params.ref)" != "refs/heads/master"'
+    script: 'test "$(params.ref)" != "refs/heads/master" || "$(params.ref)" != "refs/heads/main"'
 
 ---
