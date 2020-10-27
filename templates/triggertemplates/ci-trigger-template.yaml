@@ -1,6 +1,5 @@
 {{- $fullName := include "k8sCI.fullname" . -}}
 {{- $labels := include "k8sCI.labels" . -}}
-
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
