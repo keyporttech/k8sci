@@ -51,10 +51,6 @@ spec:
             type: git
         tasks:
         - name: runtask-ci
-          when:
-          - input: "$(tt.params.ref)"
-            operator: notin
-            values: ["refs/heads/master", "refs/heads/main"]
           params:
             - name: org
               value: $(tt.params.org)
