@@ -42,10 +42,9 @@ or install locally
 ```bash
 # CLONE THIS REPO then:
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
-
 ```
-#### [Example pipelines](./examples)
 
+#### [Example pipelines](./examples)
 ```yaml
 cicdPipelines:
   - name: nodejs
