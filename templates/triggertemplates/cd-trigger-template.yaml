@@ -82,7 +82,7 @@ spec:
                 - name: git-repo
                   resource: source-repo
             taskRef:
-              name: "{{ $fullName }}-run-command-$(params.type)"
+              name: "{{ $fullName }}-run-command-$(tt.params.type)"
       resources:
         - name: source-repo
           resourceSpec:
