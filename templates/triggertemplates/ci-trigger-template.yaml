@@ -43,7 +43,7 @@ spec:
   - apiVersion:  tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
-      generateName: build-pipeline-run-
+      generateName: ci-
     spec:
       serviceAccountName: "{{ $fullName }}"
       pipelineSpec:
