@@ -50,38 +50,38 @@ spec:
           - name: source-repo
             type: git
         tasks:
-          - name: ci
-            when:
-            - input: "$(tt.params.ref)"
-              operator: notin
-              values: ["refs/heads/master", "refs/heads/main"]
-            params:
-              - name: org
-                value: $(tt.params.org)
-              - name: repo
-                value: $(tt.params.repo)
-              - name: git_sha
-                value: $(tt.params.gitrevision)
-              - name: ref
-                value: $(tt.params.ref)
-              - name: image
-                value: $(tt.params.image)
-              - name: commands
-                value: $(tt.params.ciCommands)
-              - name: statuses
-                value: $(tt.params.ciStatuses)
-              - name: htmlurl
-                value: $(tt.params.htmlurl)
-              - name: pipelineType
-                value: "Continuous Intgegration"
-              - name: pipelineName
-                value: $(tt.params.pipelineName)
-            resources:
-              inputs:
-                - name: git-repo
-                  resource: source-repo
-            taskRef:
-              name: "{{ $fullName }}-run-command-$(params.type)"
+        - name: runtask-ci
+          when:
+          - input: "$(tt.params.ref)"
+            operator: notin
+            values: ["refs/heads/master", "refs/heads/main"]
+          params:
+            - name: org
+              value: $(tt.params.org)
+            - name: repo
+              value: $(tt.params.repo)
+            - name: git_sha
+              value: $(tt.params.gitrevision)
+            - name: ref
+              value: $(tt.params.ref)
+            - name: image
+              value: $(tt.params.image)
+            - name: commands
+              value: $(tt.params.ciCommands)
+            - name: statuses
+              value: $(tt.params.ciStatuses)
+            - name: htmlurl
+              value: $(tt.params.htmlurl)
+            - name: pipelineType
+              value: "Continuous Intgegration"
+            - name: pipelineName
+              value: $(tt.params.pipelineName)
+          resources:
+            inputs:
+              - name: git-repo
+                resource: source-repo
+          taskRef:
+            name: "{{ $fullName }}-run-command-$(params.type)"
       resources:
         - name: source-repo
           resourceSpec:

@@ -51,7 +51,7 @@ spec:
           - name: source-repo
             type: git
         tasks:
-          - name: cd
+          - name: runtask-cd
             when:
             - input: "$(tt.params.ref)"
               operator: in
