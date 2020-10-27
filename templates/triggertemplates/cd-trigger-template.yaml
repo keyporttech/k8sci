@@ -40,7 +40,7 @@ spec:
   - name: pipelineName
     description: Name of the pipeline being run
   resourcetemplates:
-  - apiVersion:  tekton.dev/v1beta1
+  - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
       generateName: cd-
