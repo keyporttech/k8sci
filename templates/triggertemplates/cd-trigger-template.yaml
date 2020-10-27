@@ -79,11 +79,10 @@ spec:
                   resource: source-repo
             taskRef:
               name: "{{ $fullName }}-run-command-$(params.type)"
-            conditions:
-            - conditionRef: "{{ $fullName }}-master-merge"
-              params:
-                - name: ref
-                  value: $(params.ref)
+            when:
+            - input: "$(params.ref)"
+              operator: in
+              values: ["refs/heads/master", "refs/heads/main"]
       resources:
         - name: source-repo
           resourceSpec:
