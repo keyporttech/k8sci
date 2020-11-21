@@ -240,6 +240,7 @@ spec:
         mv ~/.ssh/ssh-privatekey ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         mkdir -p /tekton/home/status
+        ssh-keyscan github.com >> ~/.ssh/known_hosts
     volumeMounts:
       - mountPath: /root/.ssh
         name: ssh-creds
