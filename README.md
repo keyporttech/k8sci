@@ -27,7 +27,7 @@ K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech
 
   3.) [Helm 3](https://v3.helm.sh/docs/intro/install/) installed.
 
-
+\
 ## Getting started
 
 Read the [docs](./docs/README.md)
@@ -42,10 +42,9 @@ or install locally
 ```bash
 # CLONE THIS REPO then:
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
-
 ```
-#### [Example pipelines](./examples)
 
+#### [Example pipelines](./examples)
 ```yaml
 cicdPipelines:
   - name: nodejs

@@ -18,9 +18,9 @@ REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 CWD = $(shell pwd)
 
 # PIN to TEKTON versions
-TEKTON_PIPELINE_VERSION=v0.15.0
-TEKTON_TRIGGERS_VERISON=v0.6.1
-TEKTON_DASHBOARD_VERSION=v0.8.2
+TEKTON_PIPELINE_VERSION=v0.18.1
+TEKTON_TRIGGERS_VERISON=v0.9.1
+TEKTON_DASHBOARD_VERSION=v0.11.1
 
 # Downloads the versioned tekton-releases and puts them in the crds folder
 download-tekton:
