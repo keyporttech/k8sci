@@ -13,7 +13,7 @@ init:
 	mkdir -p .keyporttech && curl -o .keyporttech/Makefile.keyporttech https://raw.githubusercontent.com/keyporttech/helm-charts/master/Makefile.keyporttech
 .PHONY: init
 
-include ../helm-charts/Makefile.keyporttech
+include ./.keyporttech/Makefile.keyporttech
 
 REGISTRY=registry.keyporttech.com
 DOCKERHUB_REGISTRY="keyporttech"
