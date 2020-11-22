@@ -150,7 +150,7 @@ spec:
       volumeMounts:
       - mountPath: /tekton/home
         name: home
-    {{- if .Values.notifications.slackWebhook }}
+    {{- if and .Values.notifications (.Values.notifications.slackWebhook) }}
     - name: slack-notify
       image: "$(params.image)"
       env:

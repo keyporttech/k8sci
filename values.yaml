@@ -2,23 +2,31 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# nameOverride -- override chart name
 nameOverride: ""
+# fullnameOverride -- override chart fullname
 fullnameOverride: ""
-
+# pullPolicy -- pull policy for all images
 pullPolicy: IfNotPresent
-
+# imagePullSecrets --image pull secrets for all images
 imagePullSecrets: []
-
+# giteaInterceptor --gitea tekton interceptor image for decoding gite hook payloads
 giteaInterceptor:
   image: keyporttech/gitea-webhook-interceptor:0.1.1
+# gogsInterceptor --gogs tekton interceptor image for decoding gite hook payloads
+# gogsInterceptor
 
 gitSources:
+  # gitSources.gitea -- if true create gitea tekcton event listener with associated ingress
   gitea: false
+  # gitSources.github -- if true create github tekcton event listener with associated ingress
   github: true
 
 # Job cleaner - prunes old jobs over max amount to keep
 cleaner:
+  # cleaner.schedule -- schedule for job cleaner
   schedule: 12 * * * *
+  # cleaner.maxJobsToKeep -- max number of jobs to keep. Cleaner will remove hte oldeest job in excess of this number.
   maxJobsToKeep: 200
 
 # The cicd pipelines
@@ -26,6 +34,9 @@ cleaner:
 # and a cd command run on merge protected branch (currently only master supported).
 # The defined image is used to run the command
 # example:
+
+# cicdPipelines -- Array of pipeline definition see docs
+cicdPipelines: []
 # cicdPipelines:
 #   - name: nodejs
 #     image: registry.domain.com/node:12.13.0
@@ -41,35 +52,49 @@ cleaner:
 # Send notifications for pipeline result
 # slackWebhook posts to slack
 notifications:
-  slackWebhook: https://hooks.slack.com/services/TTTTTTTTTT/B000000000/b1234567890ABCDEF123456
+  # notifications.slackWebHook -- slack webhook for pipeline notifications
+  slackWebhook:
+  # Ex:
+  # slackWebhook: https://hooks.slack.com/services/TTTTTTTTTT/B000000000/b1234567890ABCDEF123456
 
 # secret that stores env variables set in all pipelines
-pipelineEnvSecrets:
-  - name: GITHUB_USER
-    value: octocat
-  - name: GITHUB_TOKEN
-    value: token
-  - name: GITEA_USER
-    value: gitea
-  - name: GITEA_TOKEN
-    value: token
+# pipelineEnvSecrets -- array of secrest stored as a k8s secret and set as an env variable in each pipeline
+pipelineEnvSecrets: []
+# Ex:
+# pipelineEnvSecrets:
+#   - name: GITHUB_USER
+#     value: octocat
+#   - name: GITHUB_TOKEN
+#     value: token
+#   - name: GITEA_USER
+#     value: gitea
+#   - name: GITEA_TOKEN
+#     value: token
 
 # secret token use to encrypt payloads but github/gitea
+# webhookSecretToken -- secrets use to encode/decode all webhooks - must also be configured through github/gitea hook settings
 webhookSecretToken: "token_used_by_gihub/gitea"
 
+# gitAuthSsh -- ssh key and known_host values shared between all git soruces if used
 # gitAuthSsh:
+    # gitAuthSsh.hosts -- list of hosts for ssh
 #   hosts:
 #    - <YOUR_HOST1>
+    # gitAuthSSh.sshPrivateKey -- ssh private key stored
 #   sshPrivatekey: your_key
+    # gitAuthSsh..gitAuthknown_hosts -- list of hosts for ssh
 #   known_hosts: known_hosts_entry_to_your_ssh_server
 
 # gitAuthBasic:
+    # gitBasicSsh.hosts -- list of hosts for ssh
 #   hosts:
 #    - <YOUR_HOST1>
+    # gitAuthBasic.user -- basic auth user
 #   user: <YOUR_USER>
+    # gitAuthBasic.password -- basic auth password
 #   password: your_password
 
-
+# securityContext - pod security context
 securityContext: {}
   # capabilities:
   #   drop:
@@ -80,23 +105,31 @@ securityContext: {}
 
 
 ingress:
+  # ingress.enabled -- enabled ingress generation
   enabled: false
+  # ingress.annotations -- ingress annotations
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+  # ingress.host -- ingress host name
   host: chart-example.local
+  # ingress.dashboardHost -- ingress host for dashboard
   dashboardHost: dashboard.chart-example.local
   # used for generating links to the dashboard
+  # ingress.dashboardURL -- URL used in generation of pipeline messaging
   dashboardURL: 'https://dashboard.chart-example.local:<PORT>'
+  # ingress.tls -- tls config
   # tls:
   #   - secretName: chart-example-tls
   #     hosts:
   #       - ccicd.example.com
+  # ingress.dashBoardTLS -- tls config for dashboard ingress
   # dashBoardTLS:
   #   - secretName: dashboard-chart-example-tls
   #     hosts:
   #       - dashboard.cicd.example.com
 
+# task-resoruces -- k8s resource defs for tekton tasks
 task-resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -109,5 +142,7 @@ task-resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+
 serviceAccount:
+  # serviceAccount.annotations -- generated service account annotations
   annotations: {}

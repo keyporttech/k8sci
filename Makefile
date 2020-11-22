@@ -9,6 +9,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+init:
+	mkdir -p .keyporttech && curl -o .keyporttech/Makefile.keyporttech https://raw.githubusercontent.com/keyporttech/helm-charts/master/Makefile.keyporttech
+.PHONY: init
+
+include ../helm-charts/Makefile.keyporttech
+
 REGISTRY=registry.keyporttech.com
 DOCKERHUB_REGISTRY="keyporttech"
 CHART=k8sci
@@ -16,6 +22,10 @@ VERSION = $(shell yq r Chart.yaml 'version')
 RELEASED_VERSION = $(shell helm repo add keyporttech https://keyporttech.github.io/helm-charts/ > /dev/null && helm repo update> /dev/null && helm show chart keyporttech/$(CHART) | yq - read 'version')
 REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
 CWD = $(shell pwd)
+
+# Upstream and downstream repos
+UPSTREAM_REPO=git@github.com:keyporttech/k8sci.git
+DOWNSTREAM_REPO=git@ssh.git.keyporttech.com:keyporttech/k8sCI.git
 
 # PIN to TEKTON versions
 TEKTON_PIPELINE_VERSION=v0.18.1
@@ -30,60 +40,11 @@ download-tekton:
 	curl -o crds/3_tekton-dashboard-$(TEKTON_DASHBOARD_VERSION).yaml https://storage.googleapis.com/tekton-releases/dashboard/previous/$(TEKTON_DASHBOARD_VERSION)/tekton-dashboard-release.yaml
 .PHONY: download-tekton
 
-lint:
-	@echo "linting..."
-	helm lint
-	helm template test ./
-	ct lint --validate-maintainers=false --charts .
-	echo "NEW CHART VERISION=$(VERSION)"
-	echo "CURRENT RELEASED CHART VERSION=$(RELEASED_VERSION)"
-.PHONY: lint
-
-check-version:
-ifeq ($(VERSION),$(RELEASED_VERSION))
-	echo "$(VERSION) must be > $(RELEASED_VERSION). Please bump chart version."
-	exit 1
-endif
-.PHONY: check-version
-
-test:
-	@echo "testing..."
-	ct install --charts .
-	@echo "OK"
-.PHONY: test
-
-build: lint test
-
-.PHONY: build
-
-publish-local-registry:
-	REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
-	@echo "publishing to ${REGISTRY_TAG}"
-	HELM_EXPERIMENTAL_OCI=1 helm chart save ./ ${REGISTRY_TAG}
-	# helm chart export  ${REGISTRY_TAG}
-	HELM_EXPERIMENTAL_OCI=1 helm chart push ${REGISTRY_TAG}
-	@echo "OK"
-.PHONY: publish-local-registry
-
-publish-public-repository:
-	#docker run -e GITHUB_TOKEN=${GITHUB_TOKEN} -v `pwd`:/charts/$(CHART) registry.keyporttech.com:30243/chart-testing:0.1.4 bash -cx " \
-	#	echo $GITHUB_TOKEN; \
-	rm -f *.tgz
-	helm package .;
-	curl -o releaseChart.sh https://raw.githubusercontent.com/keyporttech/helm-charts/master/scripts/releaseChart.sh; \
-	chmod +x releaseChart.sh; \
-	./releaseChart.sh $(CHART) $(VERSION) $(CWD);
-.PHONY: publish-public-repository
-
-deploy: publish-local-registry publish-public-repository
-	rm -rf /tmp/helm-$(CHART)
-	rm -rf helm-charts
-	ssh-keyscan github.com >> ~/.ssh/known_hosts
-	git clone git@github.com:keyporttech/$(CHART).git /tmp/helm-$(CHART)
-	cd /tmp/helm-$(CHART) && git remote add downstream ssh://git@ssh.git.keyporttech.com/keyporttech/$(CHART).git
-	cd /tmp/helm-$(CHART) && git config --global user.email "bot@keyporttech.com"
-	cd /tmp/helm-$(CHART) && git config --global user.name "keyporttech-bot"
-	cd /tmp/helm-$(CHART) && git fetch downstream master
-	cd /tmp/helm-$(CHART) && git fetch origin
-	cd /tmp/helm-$(CHART) && git push -u origin downstream/master:master --force-with-lease
-.PHONY:deploy
+generate-docs:
+	@echo "generating documentation..."
+	@echo "generating README.md"
+	helm-docs --chart-search-root=./ --template-files=./README.md.gotmpl --template-files=./_templates.gotmpl --output-file=./README.md --log-level=trace
+	sed -i 's/pipelineVer/$(TEKTON_PIPELINE_VERSION)/g' ./README.md
+	sed -i 's/triggerVer/$(TEKTON_TRIGGERS_VERISON)/g' ./README.md
+	sed -i 's/dashboardVer/$(TEKTON_DASHBOARD_VERSION)/g' ./README.md
+.PHONY: generate-docs

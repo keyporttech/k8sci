@@ -22,6 +22,8 @@ spec:
     value: "{{ range .cdCommands }}\"{{ .setStatus }}\" {{ end }}"
   - name: pipelineName
     value: {{ .name }}
+  - name: protectedBranch
+    value: {{ .protectedBranch }}
 
 ---
 {{- end }}
