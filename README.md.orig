@@ -1,37 +1,4 @@
-
-{{ define "extra.logo" -}}
-```
-          ,-.
- ,     ,-.   ,-.
-/ \   (   )-(   )
-\ |  ,.>-(   )-<
- \|,' (   )-(   )
-  Y ___`-'   `-'
-  |/__/   `-'
-  |
-  |
-  |    -hi-
-__|_____________
-```
-{{- end }}
-
-
-
-{{ define "tekton.pipelineBadge" }}
-
-![pipeline: pipelineVer](https://img.shields.io/badge/pipeline-pipelineVer-informational?style=flat-square)
-{{- end }}
-
-{{ define "tekton.triggersBadge" }}
-![triggers: trigggerVer](https://img.shields.io/badge/triggers-triggerVer-informational?style=flat-square)
-{{- end }}
-
-{{ define "tekton.dashboardBadge" }}
-![dashboard: dashboardVer](https://img.shields.io/badge/dashboard-dashboardVer-informational?style=flat-square)
-{{- end }}
-
-{{ define "extra.introduction" -}}
-## Introduction
+# k8sCI
 
 K8sci is a simple powerful CI/CD system packaged as a helm chart. It is an implementation of [tekton pipeline](https://github.com/tektoncd/pipeline) [tekton triggers](https://github.com/tektoncd/triggers) and [tekton dashboard](https://github.com/tektoncd/dashboard).
 
@@ -51,8 +18,7 @@ K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech
   * Github commit status notifications per pipeline.
   * Slack webhook notifications.
   * Secrets configured in helm values file generate kubernetes secrets that are expose as environment variables.
-{{- end }}
-{{ define "extra.requirementsSection" -}}
+
 ### Prerequisites
 
   1.) A running modern supported version of kubernetes.
@@ -61,9 +27,7 @@ K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech
 
   3.) [Helm 3](https://v3.helm.sh/docs/intro/install/) installed.
 
-{{- end }}
-
-{{ define "extra.chartInstallation" -}}
+\
 ## Getting started
 
 Read the [docs](./docs/README.md)
@@ -79,28 +43,12 @@ or install locally
 # CLONE THIS REPO then:
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
 ```
-{{- end }}
 
-{{ define "extra.chartUninstall" -}}
-## Uninstalling the Chart
-
-To uninstall/delete the `my-release` deployment:
-
-```console
-$ helm uninstall my-release -n my-namespace
-```
-
-All resources associated with the last release of the chart as well as its release history will be deleted.
-{{- end }}
-
-
-{{ define "extra.configuration" -}}
 #### [Example pipelines](./examples)
 ```yaml
 cicdPipelines:
   - name: nodejs
-    protectedBranch: main
-    image: node:12.13.0
+    image: keyporttech/node:12.13.0
     ciCommands:
       - execute: "make build"
         setStatus: "build"
@@ -108,7 +56,6 @@ cicdPipelines:
       - execute: "make deploy"
         setStatus: "deploy"
   - name: golang
-    protectedBranch: master
     image: keyporttech/golang:1.14.2-alpine
     ciCommands:
       - excute: "make build"
@@ -118,7 +65,6 @@ cicdPipelines:
         setstatus: "deploy"
   - name: helm
     image: keyporttech/chart-testing:0.1.5
-    protectedBranch: main
     ciCommands:
       - execute: "make lint"
         setStatus: "lint"
@@ -130,8 +76,7 @@ cicdPipelines:
       - execute: "make deploy"
       - setStatus: "deployed"
   - name: github-actions
-    protectedBranch: main
-    image: registry.example.com/github-actions:0.1.0
+    image: registry.keyporttech.com:30243/github-actions:0.1.0
     ciCommands:
       - execute: "act"
         setStatus: "github-actions"
@@ -152,13 +97,11 @@ gitSources:
 
 cicdPipelines:
   - name: nodejs
-    protectedBranch: main
-    image: node:12.13.0
+    image: registry.host.com/node:12.13.0
     ciCommand: "make build"
     cdCommand: "make deploy"
   - name: golang
-    protectedBranch: master
-    image: registry.example.host.com/golang:1.14.2-alpine
+    image: registry.host.com/golang:1.14.2-alpine
     ciCommand: "make build"
     cdCommand: "make deploy"
 
@@ -197,10 +140,4 @@ gitAuthSsh:
     -----END OPENSSH PRIVATE KEY-----
   known_hosts: |-
     [host.com]:<PORT>,[##.##.##.##]:<PORT22 ecdsa-sha2-nistp256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...=
-```{{- end }}
-
-{{ define "extra.contributing" -}}
-## Contributing
-
-Please see [keyporttech charts contribution guidelines](https://github.com/keyporttech/helm-charts/blob/master/CONTRIBUTING.md)
-{{- end }}
+```

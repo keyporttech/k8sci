@@ -38,6 +38,8 @@ spec:
     description: repo url
   - name: pipelineName
     description: Name of the pipeline being run
+  - name: protectedBranch
+    description: protected branch name of this pipeline run
   resourcetemplates:
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
@@ -54,7 +56,7 @@ spec:
           when:
           - input: "$(tt.params.ref)"
             operator: notin
-            values: ["refs/heads/master", "refs/heads/main"]
+            values: ["$(tt.params.protectedBranch)"]
           params:
             - name: org
               value: $(tt.params.org)

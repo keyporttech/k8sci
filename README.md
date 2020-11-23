@@ -1,4 +1,16 @@
 # k8sCI
+![Version: 0.1.14](https://img.shields.io/badge/Version-0.1.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.15.0](https://img.shields.io/badge/AppVersion-0.15.0-informational?style=flat-square)
+### tekton:
+
+![pipeline: v0.18.1](https://img.shields.io/badge/pipeline-v0.18.1-informational?style=flat-square)
+![triggers: trigggerVer](https://img.shields.io/badge/triggers-v0.9.1-informational?style=flat-square)
+![dashboard: v0.11.1](https://img.shields.io/badge/dashboard-v0.11.1-informational?style=flat-square)
+
+A simple kubernetes cicd system based on tektoncd
+
+**Homepage:** <https://github.com/keyporttech/helm-k8sci>
+
+## Introduction
 
 K8sci is a simple powerful CI/CD system packaged as a helm chart. It is an implementation of [tekton pipeline](https://github.com/tektoncd/pipeline) [tekton triggers](https://github.com/tektoncd/triggers) and [tekton dashboard](https://github.com/tektoncd/dashboard).
 
@@ -27,7 +39,6 @@ K8sci dogfoods itself and handles its own build and deploy pipeline. Keyporttech
 
   3.) [Helm 3](https://v3.helm.sh/docs/intro/install/) installed.
 
-\
 ## Getting started
 
 Read the [docs](./docs/README.md)
@@ -44,11 +55,22 @@ or install locally
 cd helm/k8sCI && helm install . -f <YOUR_VALUES_FILE>
 ```
 
+## Uninstalling the Chart
+
+To uninstall/delete the `my-release` deployment:
+
+```console
+$ helm uninstall my-release -n my-namespace
+```
+
+All resources associated with the last release of the chart as well as its release history will be deleted.
+
 #### [Example pipelines](./examples)
 ```yaml
 cicdPipelines:
   - name: nodejs
-    image: keyporttech/node:12.13.0
+    protectedBranch: main
+    image: node:12.13.0
     ciCommands:
       - execute: "make build"
         setStatus: "build"
@@ -56,6 +78,7 @@ cicdPipelines:
       - execute: "make deploy"
         setStatus: "deploy"
   - name: golang
+    protectedBranch: master
     image: keyporttech/golang:1.14.2-alpine
     ciCommands:
       - excute: "make build"
@@ -65,6 +88,7 @@ cicdPipelines:
         setstatus: "deploy"
   - name: helm
     image: keyporttech/chart-testing:0.1.5
+    protectedBranch: main
     ciCommands:
       - execute: "make lint"
         setStatus: "lint"
@@ -76,7 +100,8 @@ cicdPipelines:
       - execute: "make deploy"
       - setStatus: "deployed"
   - name: github-actions
-    image: registry.keyporttech.com:30243/github-actions:0.1.0
+    protectedBranch: main
+    image: registry.example.com/github-actions:0.1.0
     ciCommands:
       - execute: "act"
         setStatus: "github-actions"
@@ -84,7 +109,6 @@ cicdPipelines:
       - execute: "act"
         setStatus: "github-actions"
 ```
-
 
 ### A full Example values.yaml
 
@@ -97,11 +121,13 @@ gitSources:
 
 cicdPipelines:
   - name: nodejs
-    image: registry.host.com/node:12.13.0
+    protectedBranch: main
+    image: node:12.13.0
     ciCommand: "make build"
     cdCommand: "make deploy"
   - name: golang
-    image: registry.host.com/golang:1.14.2-alpine
+    protectedBranch: master
+    image: registry.example.host.com/golang:1.14.2-alpine
     ciCommand: "make build"
     cdCommand: "make deploy"
 
@@ -141,3 +167,47 @@ gitAuthSsh:
   known_hosts: |-
     [host.com]:<PORT>,[##.##.##.##]:<PORT22 ecdsa-sha2-nistp256 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...=
 ```
+
+## Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| cicdPipelines | list | `[]` | Array of pipeline definition see docs |
+| cleaner.maxJobsToKeep | int | `200` | max number of jobs to keep. Cleaner will remove hte oldeest job in excess of this number. |
+| cleaner.schedule | string | `"12 * * * *"` | schedule for job cleaner |
+| fullnameOverride | string | `""` | override chart fullname |
+| gitSources.gitea | bool | `false` | if true create gitea tekcton event listener with associated ingress |
+| gitSources.github | bool | `true` | if true create github tekcton event listener with associated ingress |
+| giteaInterceptor | object | `{"image":"keyporttech/gitea-webhook-interceptor:0.1.1"}` | gitea tekton interceptor image for decoding gite hook payloads |
+| imagePullSecrets | list | `[]` | image pull secrets for all images |
+| ingress.annotations | object | `{}` | ingress annotations |
+| ingress.dashboardHost | string | `"dashboard.chart-example.local"` | ingress host for dashboard |
+| ingress.dashboardURL | string | `"https://dashboard.chart-example.local:<PORT>"` | URL used in generation of pipeline messaging |
+| ingress.enabled | bool | `false` | enabled ingress generation |
+| ingress.host | string | `"chart-example.local"` | ingress host name |
+| nameOverride | string | `""` | override chart name |
+| notifications.slackWebhook | string | `nil` |  |
+| pipelineEnvSecrets | list | `[]` | array of secrest stored as a k8s secret and set as an env variable in each pipeline |
+| pullPolicy | string | `"IfNotPresent"` | pull policy for all images |
+| securityContext | object | `{}` |  |
+| serviceAccount.annotations | object | `{}` | generated service account annotations |
+| task-resources | object | `{}` |  |
+| webhookSecretToken | string | `"token_used_by_gihub/gitea"` | secrets use to encode/decode all webhooks - must also be configured through github/gitea hook settings |
+
+## Source Code
+
+* <https://github.com/tektoncd/pipeline>
+* <https://github.com/tektoncd/triggers>
+* <https://github.com/tektoncd/dashboard>
+* <https://github.com/keyporttech/gitea-tekton-interceptor>
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| John Felten | john.felten@gmail.com |  |
+
+## Contributing
+
+Please see [keyporttech charts contribution guidelines](https://github.com/keyporttech/helm-charts/blob/master/CONTRIBUTING.md)
+
