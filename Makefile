@@ -8,6 +8,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+CHART=k8sci
+
+# PIN to TEKTON versions
+TEKTON_PIPELINE_VERSION=v0.18.1
+TEKTON_TRIGGERS_VERISON=v0.9.1
+TEKTON_DASHBOARD_VERSION=v0.11.1
 
 init:
 	mkdir -p .keyporttech && curl -o .keyporttech/Makefile.keyporttech https://raw.githubusercontent.com/keyporttech/helm-charts/master/Makefile.keyporttech
@@ -15,22 +21,6 @@ init:
 
 include ./.keyporttech/Makefile.keyporttech
 
-REGISTRY=registry.keyporttech.com
-DOCKERHUB_REGISTRY="keyporttech"
-CHART=k8sci
-VERSION = $(shell yq r Chart.yaml 'version')
-RELEASED_VERSION = $(shell helm repo add keyporttech https://keyporttech.github.io/helm-charts/ > /dev/null && helm repo update> /dev/null && helm show chart keyporttech/$(CHART) | yq - read 'version')
-REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
-CWD = $(shell pwd)
-
-# Upstream and downstream repos
-UPSTREAM_REPO=git@github.com:keyporttech/k8sci.git
-DOWNSTREAM_REPO=git@ssh.git.keyporttech.com:keyporttech/k8sCI.git
-
-# PIN to TEKTON versions
-TEKTON_PIPELINE_VERSION=v0.18.1
-TEKTON_TRIGGERS_VERISON=v0.9.1
-TEKTON_DASHBOARD_VERSION=v0.11.1
 
 # Downloads the versioned tekton-releases and puts them in the crds folder
 download-tekton:

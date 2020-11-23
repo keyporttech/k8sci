@@ -11,6 +11,17 @@
 
 # This file contains common functions for keyporttech chart ci/cd
 
+VERSION = $(shell yq r Chart.yaml 'version')
+RELEASED_VERSION = $(shell helm repo add keyporttech https://keyporttech.github.io/helm-charts/ > /dev/null && helm repo update> /dev/null && helm show chart keyporttech/$(CHART) | yq - read 'version')
+REGISTRY_TAG=${REGISTRY}/${CHART}:${VERSION}
+CWD = $(shell pwd)
+
+# Upstream and downstream repos
+UPSTREAM_REPO=git@github.com:keyporttech/k8sci.git
+DOWNSTREAM_REPO=git@ssh.git.keyporttech.com:keyporttech/k8sCI.git
+
+
+
 lint:
 	@echo "linting..."
 	helm lint
